@@ -1,0 +1,4 @@
+#ifndef SIK2_UTILITY_H
+#define SIK2_UTILITY_H
+
+#endif // SIK2_UTILITY_H
