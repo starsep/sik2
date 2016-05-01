@@ -14,22 +14,24 @@ rozpoczyna wysyłanie binarnego strumienia audio ewentualnie zmultipleksowanego
 z tekstowymi metadanymi. Sterowanie programem będzie się odbywać przez sieć za
 pomocą poleceń przesyłanych po UDP.
 
-Wywołanie programu:
+#### Wywołanie programu:
 
+`
 ./player host path r-port file m-port md
+`
 
-Parametry:
+#### Parametry:
 
-host   – nazwa serwera udostępniającego strumień audio;
-path   – nazwa zasobu, zwykle sam ukośnik;
-r-port – numer portu serwera udostępniającego strumień audio,
+`host`   – nazwa serwera udostępniającego strumień audio;
+`path`   – nazwa zasobu, zwykle sam ukośnik;
+`r-port` – numer portu serwera udostępniającego strumień audio,
          liczba dziesiętna;
-file   – nazwa pliku, do którego zapisuje się dane audio,
+`file`   – nazwa pliku, do którego zapisuje się dane audio,
          a znak minus, jeśli strumień audio ma być wysyłany na standardowe
          wyjście (w celu odtwarzania na bieżąco);
-m-port – numer portu UDP, na którym program nasłuchuje poleceń,
+`m-port` – numer portu UDP, na którym program nasłuchuje poleceń,
          liczba dziesiętna;
-md     – no, jeśli program ma nie żądać przysyłania metadanych,
+`md`     – no, jeśli program ma nie żądać przysyłania metadanych,
          yes, jeśli program ma żądać przysyłania metadanych.
 
 Do odtwarzania dźwięku na bieżąco można na przykład wykorzystać program
@@ -38,16 +40,18 @@ wejście programu mplayer.
 
 Przykładowe wywołania:
 
+```
 ./player stream3.polskieradio.pl / 8900 - 10000 no | mplayer - [opcje]
 ./player stream3.polskieradio.pl / 8904 test3.mp3 30000 no
 ./player ant-waw-01.cdn.eurozet.pl / 8602 test5.mp3 50000 yes
+```
 
 Polecenia obsługiwane przez program player:
 
-PAUSE – wstrzymuje odtwarzanie strumienia audio lub jego zapisywanie do pliku;
-PLAY  – wznawia odtwarzanie strumienia audio lub jego zapisywanie do pliku;
-TITLE – odsyła ostatnio odebraną wartość pola StreamTitle metadanych;
-QUIT  – kończy działanie programu.
+* PAUSE – wstrzymuje odtwarzanie strumienia audio lub jego zapisywanie do pliku;
+* PLAY  – wznawia odtwarzanie strumienia audio lub jego zapisywanie do pliku;
+* TITLE – odsyła ostatnio odebraną wartość pola StreamTitle metadanych;
+* QUIT  – kończy działanie programu.
 
 Polecenia przesyła się jako napisy ASCII bez terminalnego zera. Odpowiedź na
 polecenie TITLE przesyła się do jego nadawcy jako tekst ASCII bez terminalnego
@@ -77,11 +81,11 @@ identyczny z tym odebranym od serwera.
 
 Zanim zacznie się zadawać pytania prowadzącym, należy poczytać:
 
-http://www.garymcgath.com/streamingprotocols.html
-http://www.indexcom.com/streaming/player/SHOUTcast.html
-http://www.smackfu.com/stuff/programming/shoutcast.html
-http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
-http://www.listenlive.eu/poland.html
+* http://www.garymcgath.com/streamingprotocols.html
+* http://www.indexcom.com/streaming/player/SHOUTcast.html
+* http://www.smackfu.com/stuff/programming/shoutcast.html
+* http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
+* http://www.listenlive.eu/poland.html
 
 ## Część B
 
@@ -89,13 +93,15 @@ Zaimplementować program zawiadujący programami ściągającymi strumień audio
 radia internetowego. Do komunikacji z użytkownikiem zawiadowca ma udostępniać
 interfejs tekstowy za pomocą protokołu telnet.
 
-Wywołanie programu:
+#### Wywołanie programu:
 
+``
 ./master [port]
+``
 
-Parametr:
+#### Parametr:
 
-port – opcjonalny numer portu, na którym zawiadowca ma odbierać sesje telnetowe;
+`port` – opcjonalny numer portu, na którym zawiadowca ma odbierać sesje telnetowe;
        jeśli nie podano portu, zawiadowca uruchamia nasłuchiwanie na wolnym
        porcie i wypisuje jego numer; liczba dziesiętna.
 
