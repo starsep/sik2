@@ -22,17 +22,12 @@ pomocą poleceń przesyłanych po UDP.
 
 #### Parametry:
 
-`host`   – nazwa serwera udostępniającego strumień audio;
-`path`   – nazwa zasobu, zwykle sam ukośnik;
-`r-port` – numer portu serwera udostępniającego strumień audio,
-         liczba dziesiętna;
-`file`   – nazwa pliku, do którego zapisuje się dane audio,
-         a znak minus, jeśli strumień audio ma być wysyłany na standardowe
-         wyjście (w celu odtwarzania na bieżąco);
-`m-port` – numer portu UDP, na którym program nasłuchuje poleceń,
-         liczba dziesiętna;
-`md`     – no, jeśli program ma nie żądać przysyłania metadanych,
-         yes, jeśli program ma żądać przysyłania metadanych.
+- `host`   – nazwa serwera udostępniającego strumień audio;
+- `path`   – nazwa zasobu, zwykle sam ukośnik;
+- `r-port` – numer portu serwera udostępniającego strumień audio, liczba dziesiętna;
+- `file`   – nazwa pliku, do którego zapisuje się dane audio, a znak minus, jeśli strumień audio ma być wysyłany na standardowe wyjście (w celu odtwarzania na bieżąco);
+- `m-port` – numer portu UDP, na którym program nasłuchuje poleceń, liczba dziesiętna;
+- `md` – `no`, jeśli program ma nie żądać przysyłania metadanych, `yes`, jeśli program ma żądać przysyłania metadanych.
 
 Do odtwarzania dźwięku na bieżąco można na przykład wykorzystać program
 mplayer, przekierowując standardowe wyjście programu player na standardowe
