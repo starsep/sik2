@@ -1,9 +1,11 @@
 #include "utility.h"
 
+void cleanup(ExitCode exitCode) { _exit(exitCode); }
+
 void usagePlayer(const char **argv) {
   std::cerr << "Usage: " << argv[0] << " host path r-port file m-port md"
             << std::endl;
-  _exit(ExitCode::InvalidArguments);
+  cleanup(ExitCode::InvalidArguments);
 }
 
 std::tuple<std::string, std::string, unsigned, std::string, unsigned, bool>
@@ -30,6 +32,41 @@ get_arguments(int argc, const char **argv) {
   return std::make_tuple(host, path, rPort, filename, mPort, metadata);
 }
 
+Socket connectPlayer(const std::string &host, unsigned port) {
+  std::cerr << "Connecting with: " << host << " on port: " << port << std::endl;
+  addrinfo hints;
+  addrinfo *result;
+
+  _getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &result);
+
+  Socket sock =
+      _socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+
+  _connect(sock, result->ai_addr, result->ai_addrlen);
+  freeaddrinfo(result);
+
+  return sock;
+}
+
+bool checkSocket(epoll_event &event, Socket sock, bool metadata) {
+
+  if (event.data.fd == sock) {
+    try {
+      std::string data = receiveShoutcast(sock, metadata);
+//      std::cerr << data.size() << std::endl;
+      std::cout.write(data.c_str(), data.size());
+      std::cout.flush();
+    } catch (BadNetworkDataException) {
+      std::cerr << "Incorrect data received from server. Exiting." << std::endl;
+      cleanup(ExitCode::BadData);
+    } catch (ClosedConnectionException) {
+      cleanup(ExitCode::Ok);
+    }
+    return true;
+  }
+  return false;
+}
+
 int main(int argc, const char **argv) {
   auto arguments = get_arguments(argc, argv);
   std::string host(std::get<0>(arguments));
@@ -41,5 +78,21 @@ int main(int argc, const char **argv) {
 
   File file = filename == stdOut ? stdOutFile : _open(filename.c_str(), 0);
 
-  _exit(ExitCode::Ok);
+  Socket sock = connectPlayer(host, rPort);
+  makeSocketNonBlocking(sock);
+  Epoll efd = _epoll_create();
+  addEpollEvent(efd, sock);
+  sendShoutcastHeader(sock);
+
+  while (true) {
+    epoll_event *events = new epoll_event[MAX_SOCKETS_PLAYER];
+    int numberOfEvents = epoll_wait(efd, events, MAX_SOCKETS_PLAYER, MAX_TIME);
+    //std::cerr << "here I am: " << numberOfEvents << std::endl;
+    for (int i = 0; i < numberOfEvents; i++) {
+      checkSocket(events[i], sock, metadata);
+    }
+    delete[] events;
+  }
+
+  cleanup(ExitCode::Ok);
 }
