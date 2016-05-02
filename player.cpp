@@ -23,7 +23,7 @@ get_arguments(int argc, const char **argv) {
   }
   std::string md(argv[6]);
   if (md != YES && md != NO) {
-    std::cerr << "md argument must be yes or no" << std::endl;
+    std::cerr << "md argument must be " << YES << " or " << NO << std::endl;
     usagePlayer(argv);
   }
   bool metadata = md == YES;
