@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <tuple>
+#include <fstream>
 
 #include <netdb.h>
 #include <sys/epoll.h>
@@ -18,6 +19,7 @@ const unsigned INVALID_PORT = 0;
 const unsigned MIN_PORT = 1;
 const unsigned MAX_PORT = (1 << 16) - 1;
 const std::string stdOut = "-";
+const std::string stdOutFilename = "/dev/stdout";
 const std::string YES = "yes";
 const std::string NO = "no";
 const std::string INVALID_DATA = "";

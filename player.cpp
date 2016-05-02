@@ -53,7 +53,7 @@ bool checkSocket(epoll_event &event, Socket sock, bool metadata) {
   if (event.data.fd == sock) {
     try {
       std::string data = receiveShoutcast(sock, metadata);
-//      std::cerr << data.size() << std::endl;
+      //      std::cerr << data.size() << std::endl;
       std::cout.write(data.c_str(), data.size());
       std::cout.flush();
     } catch (BadNetworkDataException) {
@@ -76,7 +76,11 @@ int main(int argc, const char **argv) {
   unsigned mPort(std::get<4>(arguments));
   bool metadata = (std::get<5>(arguments));
 
-  File file = filename == stdOut ? stdOutFile : _open(filename.c_str(), 0);
+  if (filename == stdOut) {
+    filename = stdOutFilename;
+  }
+  std::ofstream ofstream(filename, std::fstream::binary);
+  std::cout.rdbuf(ofstream.rdbuf());
 
   Socket sock = connectPlayer(host, rPort);
   makeSocketNonBlocking(sock);
@@ -87,7 +91,7 @@ int main(int argc, const char **argv) {
   while (true) {
     epoll_event *events = new epoll_event[MAX_SOCKETS_PLAYER];
     int numberOfEvents = epoll_wait(efd, events, MAX_SOCKETS_PLAYER, MAX_TIME);
-    //std::cerr << "here I am: " << numberOfEvents << std::endl;
+    // std::cerr << "here I am: " << numberOfEvents << std::endl;
     for (int i = 0; i < numberOfEvents; i++) {
       checkSocket(events[i], sock, metadata);
     }
