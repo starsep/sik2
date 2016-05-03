@@ -53,6 +53,6 @@ void _write(Socket, const void *, size_t);
 Epoll _epoll_create();
 void makeSocketNonBlocking(Socket);
 std::string receiveShoutcast(Socket, bool);
-void sendShoutcastHeader(Socket, const std::string &);
+void sendShoutcastHeader(Socket, const std::string &, bool);
 
 #endif // SIK2_UTILITY_H

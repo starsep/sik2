@@ -106,7 +106,7 @@ int main(int argc, const char **argv) {
   makeSocketNonBlocking(sock);
   Epoll efd = _epoll_create();
   addEpollEvent(efd, sock);
-  sendShoutcastHeader(sock, path);
+  sendShoutcastHeader(sock, path, metadata);
 
   int headerCounter = 0;
   while (true) {
