@@ -58,7 +58,7 @@ void handleHeader(const std::string &header, bool metadata) {
   std::string line;
   while (!sstream.eof()) {
     std::getline(sstream, line);
-    if (line.empty()) {
+    if (line.empty() || line == "\r") {
       std::getline(sstream, line, char(EOF));
       return handleData(line, metadata);
     }
