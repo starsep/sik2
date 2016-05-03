@@ -144,7 +144,12 @@ std::string receiveShoutcast(Socket from, bool) {
   return result;
 }
 
-void sendShoutcastHeader(Socket sock) {
-  static const char *header = "GET / HTTP/1.0\r\nAccept: */*\r\nIcy-MetaData: 0\r\nConnection: close\r\n\r\n";
-  _write(sock, header, strlen(header));
+void sendShoutcastHeader(Socket sock, const std::string &path) {
+  std::string request;
+  request += "GET " + path + " HTTP/1.0\r\n"; // http header
+  request += "Accept: */*\r\n";               // accept header
+  request += "Icy-MetaData: 0\r\n";           // whether we want metadata
+  request += "Connection: close\r\n";         // connection header
+  request += "\r\n";                          // empty line
+  _write(sock, request.c_str(), request.size());
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <tuple>
 #include <fstream>
+#include <sstream>
 
 #include <netdb.h>
 #include <sys/epoll.h>
@@ -23,6 +24,7 @@ const std::string stdOutFilename = "/dev/stdout";
 const std::string YES = "yes";
 const std::string NO = "no";
 const std::string INVALID_DATA = "";
+const int HEADER_EVENTS = 2;
 
 const int BUFFER_LEN = 10000;
 
@@ -51,6 +53,6 @@ void _write(Socket, const void *, size_t);
 Epoll _epoll_create();
 void makeSocketNonBlocking(Socket);
 std::string receiveShoutcast(Socket, bool);
-void sendShoutcastHeader(Socket);
+void sendShoutcastHeader(Socket, const std::string &);
 
 #endif // SIK2_UTILITY_H

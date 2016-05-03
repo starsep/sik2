@@ -5,6 +5,7 @@
       <w>endl</w>
       <w>fcntl</w>
       <w>shoutcast</w>
+      <w>sstream</w>
     </words>
   </dictionary>
 </component>
