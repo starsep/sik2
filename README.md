@@ -43,15 +43,13 @@ Przykładowe wywołania:
 
 Polecenia obsługiwane przez program player:
 
-* PAUSE – wstrzymuje odtwarzanie strumienia audio lub jego zapisywanie do pliku;
-* PLAY  – wznawia odtwarzanie strumienia audio lub jego zapisywanie do pliku;
-* TITLE – odsyła ostatnio odebraną wartość pola StreamTitle metadanych;
-* QUIT  – kończy działanie programu.
+* `PAUSE` – wstrzymuje odtwarzanie strumienia audio lub jego zapisywanie do pliku;
+* `PLAY` – wznawia odtwarzanie strumienia audio lub jego zapisywanie do pliku;
+* `TITLE` – odsyła ostatnio odebraną wartość pola StreamTitle metadanych;
+* `QUIT`  – kończy działanie programu.
 
 Polecenia przesyła się jako napisy ASCII bez terminalnego zera. Odpowiedź na
-polecenie TITLE przesyła się do jego nadawcy jako tekst ASCII bez terminalnego
-zera. Proces przysyłający polecenia może być uruchomiony na innej maszynie niż
-program odtwarzacza audio.
+polecenie `TITLE` przesyła się do jego nadawcy jako tekst ASCII bez terminalnego zera. Proces przysyłający polecenia może być uruchomiony na innej maszynie niż program odtwarzacza audio.
 
 Program musi być odporny na podanie złej liczby parametrów, na niepoprawne
 wartości parametrów i nieprawidłowe dane przysyłane przez serwer radia
@@ -65,7 +63,7 @@ zawieszać. W szczególności należy przyjąć maksymalny czas oczekiwania na
 zbudowanie połączenia TCP wynikający z implementacji interfejsu gniazd, a
 maksymalny czas oczekiwania na dane od serwera radia internetowego należy
 ustalić na 5 sekund. Poprawne zakończenie programu (w wyniku wykonania
-polecenia QUIT lub zamknięcia połączenia przez serwer radia internetowego w
+polecenia `QUIT` lub zamknięcia połączenia przez serwer radia internetowego w
 trakcie przysyłania strumienia audio) należy sygnalizować kodem powrotu 0.
 
 Serwer radia nie dba o ramkowanie danych MP3. Pierwsza przysłana ramka jest
@@ -76,11 +74,11 @@ identyczny z tym odebranym od serwera.
 
 Zanim zacznie się zadawać pytania prowadzącym, należy poczytać:
 
-* http://www.garymcgath.com/streamingprotocols.html
-* http://www.indexcom.com/streaming/player/SHOUTcast.html
-* http://www.smackfu.com/stuff/programming/shoutcast.html
-* http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
-* http://www.listenlive.eu/poland.html
+- http://www.garymcgath.com/streamingprotocols.html
+- http://www.indexcom.com/streaming/player/SHOUTcast.html
+- http://www.smackfu.com/stuff/programming/shoutcast.html
+- http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
+- http://www.listenlive.eu/poland.html
 
 ## Część B
 
@@ -109,66 +107,58 @@ Zawiadowca musi być odporny na nieprawidłowe dane przysyłane przez sieć. Tak
 dane nie powinny doprowadzać do zawieszenia się zawiadowcy, naruszenia ochrony
 pamięci itp.
 
-Zawiadowca ma umożliwiać:
-– uruchomienie programu ściągającego z podanymi przez użytkownika parametrami
+#### Zawiadowca ma umożliwiać:
+- uruchomienie programu ściągającego z podanymi przez użytkownika parametrami
   gdziekolwiek w sieci lokalnej;
-– wydawanie poleceń działającemu programowi ściągającemu; zawiadowca czeka
-  maksymalnie 3 sekundy na odpowiedź na polecenie TITLE;
-– wyświetlenie komunikatu o zakończeniu działania programu ściągającego wraz
+- wydawanie poleceń działającemu programowi ściągającemu; zawiadowca czeka
+  maksymalnie 3 sekundy na odpowiedź na polecenie `TITLE`;
+- wyświetlenie komunikatu o zakończeniu działania programu ściągającego wraz
   z ewentualnym komunikatem o przyczynie (błędzie) jego zakończenia;
-– wydawanie polecenia „od godz. HH.MM ściągaj z radia X audycję przez M minut”;
+- wydawanie polecenia „od godz. HH.MM ściągaj z radia X audycję przez M minut”;
   odmierzanie czasu ma być zrealizowane po stronie zawiadowcy;
-– równoległą obsługę wielu sesji telnetowych;
-– symultaniczną obsługę wielu programów ściągających w jednej sesji telnetowej.
+- równoległą obsługę wielu sesji telnetowych;
+- symultaniczną obsługę wielu programów ściągających w jednej sesji telnetowej.
 
 Komunikacja odbywa się normalną sesją telnetową:
 
-telnet <master> <port-nasłuchujący>
+`telnet <master> <port-nasłuchujący>`
 
-Każde polecenie podawane jest jako pojedynczy wiersz tekstu, na początku wiersza
-nazwa polecenia, potem rozdzielone spacjami parametry. Z wyjątkiem poleceń START
-i AT pierwszym parametrem jest magiczny identyfikator ID uprzednio uruchomionego
-egzemplarza programu ściągającego (zwracany przez polecenia START i AT).
+Każde polecenie podawane jest jako pojedynczy wiersz tekstu, na początku wiersza nazwa polecenia, potem rozdzielone spacjami parametry. Z wyjątkiem poleceń `START` i `AT` pierwszym parametrem jest magiczny identyfikator `ID` uprzednio uruchomionego egzemplarza programu ściągającego (zwracany przez polecenia `START` i `AT`).
 
 Po wyświetleniu komunikatu o zakończeniu działania programu ściągającego
 (komunikat ma zawierać jego ID) identyfikator jest unieważniany.
 
-Polecenia obsługiwane przez zawiadowcę:
+#### Polecenia obsługiwane przez zawiadowcę:
 
-START <komputer> <parametr-dla-playera> ...
+- `START <komputer> <parametr-dla-playera> ...`
 
   Uruchamia program ściągający na podanym komputerze z podanymi parametrami.
   Przy poprawnym wykonaniu odpowiada OK wraz z ID, którego należy używać
   w pozostałych poleceniach.
 
-<polecenie-playera> <id>
+- `<polecenie-playera> <id>`
 
-  Jedno z poleceń do przesłania programowi player (PAUSE, PLAY, TITLE, QUIT).
-  Przy poprawnym wykonaniu odpowiada OK wraz z ID, a dla TITLE odpowiedź
-  dodatkowo zawiera wartość StreamTitle.
+  Jedno z poleceń do przesłania programowi player (`PAUSE`, `PLAY`, `TITLE`, `QUIT`). Przy poprawnym wykonaniu odpowiada `OK` wraz z `ID`, a dla `TITLE` odpowiedź dodatkowo zawiera wartość StreamTitle.
 
-AT <HH.MM> <M> <komputer> <parametr-dla-playera> ...
+- `AT <HH.MM> <M> <komputer> <parametr-dla-playera> ...`
 
-  Wersja polecenia START z opóźnionym uruchomieniem programu player. Parametry
-  <HH.MM> i <M> to czas uruchomienia i czas działania. Odmierzaniem czasu
+  Wersja polecenia `START` z opóźnionym uruchomieniem programu `player`. Parametry `<HH.MM>` i `<M>` to czas uruchomienia i czas działania. Odmierzaniem czasu
   zajmuje się zawiadowca, tzn. o podanej godzinie startuje program player, czeka
-  podaną liczbę minut i wyłącza go. Parametr <file> dla programu player musi być
-  nazwą pliku (a nie znakiem -). Przy poprawnym wykonaniu odpowiada OK wraz
-  z ID, którego należy używać w pozostałych poleceniach.
+  podaną liczbę minut i wyłącza go. Parametr `<file>` dla programu `player` musi być nazwą pliku (a nie znakiem -). Przy poprawnym wykonaniu odpowiada `OK` wraz z `ID`, którego należy używać w pozostałych poleceniach.
 
 W przypadku jakiegokolwiek błędu w odpowiedniej sesji telnetowej ma być wypisana
 informacja o błędzie zaczynająca się słowem ERROR i ewentualnie ID, jeśli błąd
 dotyczy konkretnego uruchomionego programu player.
 
-Zakładamy, że program player znajduje się w katalogu, którego nazwa jest
+Zakładamy, że program `player` znajduje się w katalogu, którego nazwa jest
 skonfigurowana wśród ścieżek poszukiwań plików wykonywalnych na docelowym
 komputerze, na którym chcemy go uruchomić.
 
-Uwagi do protokołu i programu telnet:
-– Protokół telnet oprócz tekstu przewiduje przesyłanie sekwencji sterujących
+#### Uwagi do protokołu i programu telnet:
+- Protokół telnet oprócz tekstu przewiduje przesyłanie sekwencji sterujących
   zaczynających się od bajtu o wartości 255. Mają one dwa lub trzy bajty.
   Należy być przygotowanym na takie sekwencje.
-– Wysyłane wiersze domyślnie kończą się parą znaków CR/LF, ale jest to
+- Wysyłane wiersze domyślnie kończą się parą znaków CR/LF, ale jest to
   konfigurowalne, więc należy być przygotowanym na najgorsze (np. samo CR).
 
 ## Oddawanie rozwiązania
@@ -176,10 +166,10 @@ Uwagi do protokołu i programu telnet:
 Można oddać rozwiązanie tylko części A lub tylko części B, albo obu części.
 
 Rozwiązanie ma:
-– działać w środowisku Linux;
-– być napisane w języku C lub C++ z wykorzystaniem interfejsu gniazd (nie wolno
+- działać w środowisku Linux;
+- być napisane w języku C lub C++ z wykorzystaniem interfejsu gniazd (nie wolno
   korzystać z libevent ani boost::asio);
-– kompilować się za pomocą GCC (polecenie gcc lub g++) – wśród parametrów należy
+- kompilować się za pomocą GCC (polecenie gcc lub g++) – wśród parametrów należy
   użyć -Wall i -O2.
 
 Jako rozwiązanie należy dostarczyć pliki źródłowe oraz plik makefile, które
@@ -213,9 +203,9 @@ zgodne ze specyfikacją, ocena końcowa będzie sumą ocen za poszczególne czę
 pomnożoną przez 1,2.
 
 Ocena każdej z części zadania będzie się składała z trzech składników:
-– ocena wzrokowa i słuchowa działania programu (20% w części A, 60% w części B);
-– testy automatyczne (60% w części A, 20% w części B);
-– jakość tekstu źródłowego (20%).
+- ocena wzrokowa i słuchowa działania programu (20% w części A, 60% w części B);
+- testy automatyczne (60% w części A, 20% w części B);
+- jakość tekstu źródłowego (20%).
 
 Termin: poniedziałek 30 maja 2016, godzina 19.00
         (liczy się czas na serwerze SVN)
