@@ -5,7 +5,7 @@ void usageMaster(const char **argv) {
   _exit(ExitCode::InvalidArguments);
 }
 
-unsigned get_arguments(int argc, const char **argv) {
+unsigned getArguments(int argc, const char **argv) {
   if (argc < 1 || argc > 2) {
     std::cerr << "Bad number of arguments" << std::endl;
     usageMaster(argv);
@@ -24,5 +24,5 @@ unsigned get_arguments(int argc, const char **argv) {
 }
 
 int main(int argc, const char **argv) {
-  unsigned port = get_arguments(argc, argv);
+  unsigned port = getArguments(argc, argv);
 }

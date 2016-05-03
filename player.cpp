@@ -9,7 +9,7 @@ void usagePlayer(const char **argv) {
 }
 
 std::tuple<std::string, std::string, unsigned, std::string, unsigned, bool>
-get_arguments(int argc, const char **argv) {
+getArguments(int argc, const char **argv) {
   if (argc != 7) {
     std::cerr << "Bad number of arguments" << std::endl;
     usagePlayer(argv);
@@ -88,7 +88,7 @@ bool checkSocket(epoll_event &event, Socket sock, bool metadata, bool header) {
 }
 
 int main(int argc, const char **argv) {
-  auto arguments = get_arguments(argc, argv);
+  auto arguments = getArguments(argc, argv);
   std::string host(std::get<0>(arguments));
   std::string path(std::get<1>(arguments));
   unsigned rPort(std::get<2>(arguments));
