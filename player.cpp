@@ -97,6 +97,4 @@ int main(int argc, const char **argv) {
     }
     delete[] events;
   }
-
-  cleanup(ExitCode::Ok);
 }
