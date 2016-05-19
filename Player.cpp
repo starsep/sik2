@@ -173,11 +173,9 @@ void Player::run() {
   efd.addEvent(sock);
   Utility::sendShoutcastHeader(sock, path, metadata);
   while (true) {
-    epoll_event *events = new epoll_event[MAX_SOCKETS_PLAYER];
-    int numberOfEvents = efd.wait(events, MAX_SOCKETS_PLAYER, MAX_TIME);
-    for (int i = 0; i < numberOfEvents; i++) {
-      checkSocket(events[i], sock, stillHeader);
+    std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
+    for (epoll_event &event : events) {
+      checkSocket(event, sock, stillHeader);
     }
-    delete[] events;
   }
 }

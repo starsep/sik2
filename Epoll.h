@@ -3,13 +3,16 @@
 
 #include "Socket.h"
 #include <sys/epoll.h>
+#include <vector>
 
 class Epoll {
 private:
   int efd;
 public:
   void addEvent(const Socket &socket);
-  int wait(epoll_event *, int, int);
+
+  std::vector <epoll_event> wait(int, int);
+
   Epoll();
 };
 

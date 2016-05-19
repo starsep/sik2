@@ -28,6 +28,9 @@ Epoll::Epoll() {
   }
 }
 
-int Epoll::wait(epoll_event *events, int maxevents, int timeout) {
-  return epoll_wait(efd, events, maxevents, timeout);
+std::vector <epoll_event> Epoll::wait(int maxevents, int timeout) {
+  std::vector <epoll_event> result;
+  result.resize(maxevents);
+  epoll_wait(efd, result.data(), maxevents, timeout);
+  return result;
 }

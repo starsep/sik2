@@ -48,7 +48,7 @@ static void setAddrinfo(addrinfo *addr, bool passive) {
 }
 
 void Utility::_getaddrinfo(const char *node, const char *service, addrinfo *hints,
-                  addrinfo **res, bool passive) {
+                           addrinfo **res, bool passive) {
   setAddrinfo(hints, passive);
   int err = getaddrinfo(node, service, hints, res);
   if (err == EAI_SYSTEM) {
