@@ -1,28 +1,43 @@
 #include "utility.h"
 
-void usageMaster(const char **argv) {
-  std::cerr << "Usage: " << argv[0] << " [port]" << std::endl;
-  _exit(ExitCode::InvalidArguments);
-}
+class Master {
+private:
+  unsigned port;
 
-unsigned getArguments(int argc, const char **argv) {
-  if (argc < 1 || argc > 2) {
-    std::cerr << "Bad number of arguments" << std::endl;
-    usageMaster(argv);
+  void usage(const char **argv) {
+    std::cerr << "Usage: " << argv[0] << " [port]" << std::endl;
+    _exit(ExitCode::InvalidArguments);
   }
-  if (argc == 1) {
-    unsigned port = getFreePort();
-    std::cerr << port << std::endl;
-    return port;
+
+  void getArguments(int argc, const char **argv) {
+    if (argc < 1 || argc > 2) {
+      std::cerr << "Bad number of arguments" << std::endl;
+      usage(argv);
+    }
+    if (argc == 1) {
+      port = getFreePort();
+      std::cerr << port << std::endl;
+      return;
+    }
+    port = getPort(argv[1]);
+    if (port == INVALID_PORT) {
+      std::cerr << "Bad port number" << std::endl;
+      usage(argv);
+    }
   }
-  unsigned port = getPort(argv[1]);
-  if (port == INVALID_PORT) {
-    std::cerr << "Bad port number" << std::endl;
-    usageMaster(argv);
+
+public:
+  Master(int argc, const char **argv) {
+    getArguments(argc, argv);
   }
-  return port;
-}
+
+  void run() {
+
+  }
+};
+
 
 int main(int argc, const char **argv) {
-  unsigned port = getArguments(argc, argv);
+  Master master(argc, argv);
+  master.run();
 }
