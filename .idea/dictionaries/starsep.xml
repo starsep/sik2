@@ -4,8 +4,10 @@
       <w>cout</w>
       <w>endl</w>
       <w>fcntl</w>
+      <w>metaint</w>
       <w>shoutcast</w>
       <w>sstream</w>
+      <w>substr</w>
     </words>
   </dictionary>
 </component>

@@ -1,6 +1,18 @@
 #ifndef SIK2_UTILITY_H
 #define SIK2_UTILITY_H
 
+#include <boost/regex.hpp>
+#include <cctype>
+#include <iostream>
+#include <sstream>
+#include <ostream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <tuple>
+#include <iomanip>
+#include <exception>
+
 #include <iostream>
 #include <tuple>
 #include <fstream>

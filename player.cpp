@@ -3,8 +3,7 @@
 void cleanup(ExitCode exitCode) { _exit(exitCode); }
 
 void usagePlayer(const char **argv) {
-  std::cerr << "Usage: " << argv[0] << " host path r-port file m-port md"
-            << std::endl;
+  std::cerr << "Usage: " << argv[0] << " host path r-port file m-port md" << std::endl;
   cleanup(ExitCode::InvalidArguments);
 }
 
@@ -48,9 +47,80 @@ Socket connectPlayer(const std::string &host, unsigned port) {
   return sock;
 }
 
-void handleData(const std::string &data, bool metadata) {
+bool stillHeader = true;
+int metaInt = 0;
+int byteCounter = 0;
+int metadataCount = 0;
+std::string metaData;
+
+void handleMetadata() {
+  boost::smatch what;
+  const static boost::regex metaIntPattern(R"(StreamTitle='(.*?)';)");
+  try {
+    if (boost::regex_search(metaData, what, metaIntPattern)) {
+      std::cerr << what[1] << std::endl;
+    }
+  }
+  catch (...) {
+  }
+  metaData = "";
+}
+
+
+void printData(const std::string &data) {
   std::cout << data;
   std::cout.flush();
+}
+
+void handleData(std::string &data, bool metadata) {
+  stillHeader = false;
+  if (metadata && metaInt > 0) {
+    auto subtractMetadata = [&data, &metaData] () {
+      size_t oldSize = metaData.size();
+      metaData += data.substr(0, metadataCount);
+      data = data.substr(metaData.size() - oldSize, data.size());
+      metadataCount -= metaData.size();
+      if (metadataCount <= 0) {
+        metadataCount = 0;
+        handleMetadata();
+      }
+    };
+    if (metadataCount > 0) {
+      subtractMetadata();
+    }
+    byteCounter += data.size();
+    if (byteCounter > metaInt) {
+      byteCounter -= data.size();
+      int dataSize = metaInt - byteCounter;
+      printData(data.substr(0, dataSize));
+      byteCounter += dataSize;
+      byteCounter %= metaInt;
+      data = data.substr(dataSize, data.size());
+      metadataCount = (unsigned char) data[0] * 16;
+      data = data.substr(1, data.size());
+      subtractMetadata();
+      printData(data);
+      byteCounter += data.size();
+      byteCounter %= metaInt;
+    } else {
+      printData(data);
+    }
+  } else {
+    printData(data);
+  }
+}
+
+void handleHeaderLine(const std::string &line) {
+  std::cerr << line << std::endl;
+  boost::smatch what;
+  const static boost::regex metaIntPattern(R"(icy-metaint:\s*(\d+).*)");
+  try {
+    if (boost::regex_match(line, what, metaIntPattern)) {
+      metaInt = std::stoi(what[1]);
+    }
+  }
+  catch (...) {
+  }
 }
 
 void handleHeader(const std::string &header, bool metadata) {
@@ -62,7 +132,7 @@ void handleHeader(const std::string &header, bool metadata) {
       std::getline(sstream, line, char(EOF));
       return handleData(line, metadata);
     }
-    std::cerr << line << std::endl;
+    handleHeaderLine(line);
   }
 }
 
@@ -107,17 +177,11 @@ int main(int argc, const char **argv) {
   Epoll efd = _epoll_create();
   addEpollEvent(efd, sock);
   sendShoutcastHeader(sock, path, metadata);
-
-  int headerCounter = 0;
   while (true) {
     epoll_event *events = new epoll_event[MAX_SOCKETS_PLAYER];
     int numberOfEvents = epoll_wait(efd, events, MAX_SOCKETS_PLAYER, MAX_TIME);
-    // std::cerr << "here I am: " << numberOfEvents << std::endl;
     for (int i = 0; i < numberOfEvents; i++) {
-      checkSocket(events[i], sock, metadata, headerCounter < HEADER_EVENTS);
-      if (headerCounter < HEADER_EVENTS) {
-        headerCounter++;
-      }
+      checkSocket(events[i], sock, metadata, stillHeader);
     }
     delete[] events;
   }
