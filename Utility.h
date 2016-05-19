@@ -21,12 +21,16 @@
 #include <netdb.h>
 #include <sys/epoll.h>
 
-using File = int;
-using Socket = int;
-using Epoll = int;
+#include "Socket.h"
+#include "Epoll.h"
 
-class ClosedConnectionException {};
-class BadNetworkDataException {};
+using File = int;
+
+class ClosedConnectionException {
+};
+
+class BadNetworkDataException {
+};
 
 const unsigned INVALID_PORT = 0;
 const unsigned MIN_PORT = 1;
@@ -52,19 +56,22 @@ enum class ExitCode {
   BadData = 1,
 };
 
-void _exit(ExitCode);
-void _getaddrinfo(const char *, const char *, addrinfo *, addrinfo **,
-                  bool = false);
-unsigned getPort(const char *);
-unsigned getFreePort();
-File _open(const char *, int);
-Socket _socket(int, int, int);
-void addEpollEvent(Epoll, Socket);
-void _connect(Socket, const sockaddr *, socklen_t);
-void _write(Socket, const void *, size_t);
-Epoll _epoll_create();
-void makeSocketNonBlocking(Socket);
-std::string receiveShoutcast(Socket, bool);
-void sendShoutcastHeader(Socket, const std::string &, bool);
+class Utility {
+public:
+  static void _exit(ExitCode);
+
+  static void syserr(const char *fmt, ...);
+
+  static void _getaddrinfo(const char *, const char *, addrinfo *, addrinfo **,
+                           bool = false);
+
+  static unsigned getPort(const char *);
+
+  static unsigned getFreePort();
+
+  static std::string receiveShoutcast(Socket, bool);
+
+  static void sendShoutcastHeader(Socket, const std::string &, bool);
+};
 
 #endif // SIK2_UTILITY_H
