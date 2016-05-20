@@ -10,20 +10,8 @@ player: player_main.cpp $(OFILES)
 master: master_main.cpp $(OFILES)
 	$(COMPILER) $(CPPFLAGS) -o $@ $^ $(LIBSFLAGS)
 
-Player.o: Player.h Player.cpp
-	$(COMPILER) $(CPPFLAGS) -c Player.cpp $(LIBSFLAGS)
-
-Master.o: Master.h Master.cpp
-	$(COMPILER) $(CPPFLAGS) -c Master.cpp $(LIBSFLAGS)
-
-Utility.o: Utility.h Utility.cpp
-	$(COMPILER) $(CPPFLAGS) -c Utility.cpp $(LIBSFLAGS)
-
-Socket.o: Socket.h Socket.cpp
-	$(COMPILER) $(CPPFLAGS) -c Socket.cpp $(LIBSFLAGS)
-
-Epoll.o: Epoll.h Epoll.cpp
-	$(COMPILER) $(CPPFLAGS) -c Epoll.cpp $(LIBSFLAGS)
+%.o: %?.h %?.cpp
+	$(COMPILER) $(CPPFLAGS) -c %?.cpp
 
 clean:
 	rm -f master player *.o
