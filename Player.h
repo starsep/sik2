@@ -23,7 +23,7 @@ private:
 
   void usage(const char **argv);
 
-  bool checkSocket(epoll_event &event, const Socket &sock, bool header);
+  bool checkSocket(epoll_event &event, Socket &sock);
 
   Socket connect();
 

@@ -30,12 +30,12 @@ void Player::usage(const char **argv) {
   cleanup(ExitCode::InvalidArguments);
 }
 
-bool Player::checkSocket(epoll_event &event, const Socket &sock, bool header) {
+bool Player::checkSocket(epoll_event &event, Socket &sock) {
   if (event.data.fd == sock.get()) {
     try {
-      std::string data = Utility::receiveShoutcast(sock, metadata);
+      std::string data = sock.receiveShoutcast(metadata);
       //      std::cerr << data.size() << std::endl;
-      if (header) {
+      if (stillHeader) {
         handleHeader(data);
       } else {
         handleData(data);
@@ -171,11 +171,11 @@ void Player::run() {
   sock.makeNonBlocking();
   Epoll efd{};
   efd.addEvent(sock);
-  Utility::sendShoutcastHeader(sock, path, metadata);
+  sock.sendShoutcastHeader(path, metadata);
   while (true) {
     std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
     for (epoll_event &event : events) {
-      checkSocket(event, sock, stillHeader);
+      checkSocket(event, sock);
     }
   }
 }

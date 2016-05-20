@@ -2,6 +2,7 @@
 #define SIK2_SOCKET_H
 
 #include <netdb.h>
+#include <string>
 
 class Socket {
 private:
@@ -18,6 +19,10 @@ public:
   int get() const;
 
   void makeNonBlocking();
+
+  std::string receiveShoutcast(bool);
+
+  void sendShoutcastHeader(const std::string &, bool);
 };
 
 #endif //SIK2_SOCKET_H

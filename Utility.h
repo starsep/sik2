@@ -68,10 +68,6 @@ public:
   static unsigned getPort(const char *);
 
   static unsigned getFreePort();
-
-  static std::string receiveShoutcast(Socket, bool);
-
-  static void sendShoutcastHeader(Socket, const std::string &, bool);
 };
 
 #endif // SIK2_UTILITY_H

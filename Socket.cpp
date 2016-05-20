@@ -59,3 +59,30 @@ ssize_t Socket::Read(void *buffer, size_t maxCount) {
   }
   return count;
 }
+
+std::string Socket::receiveShoutcast(bool) {
+  static char buffer[BUFFER_LEN];
+  std::string result = INVALID_DATA;
+  while (true) {
+    ssize_t count = Read(buffer, BUFFER_LEN);
+    if (count == -1 && errno == EAGAIN) {
+      break;
+    }
+    if (count == 0) {
+      throw ClosedConnectionException();
+    }
+    result += std::string(buffer, count);
+  }
+  return result;
+}
+
+void Socket::sendShoutcastHeader(const std::string &path, bool md) {
+  std::string request;
+  request += "GET " + path + " HTTP/1.0\r\n"; // http header
+  request += "Accept: */*\r\n";               // accept header
+  request += std::string("Icy-MetaData: ") + (md ? "1" : "0") +
+             "\r\n";                  // whether we want metadata
+  request += "Connection: close\r\n"; // connection header
+  request += "\r\n";                  // empty line
+  Write(request.c_str(), request.size());
+}
