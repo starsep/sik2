@@ -39,7 +39,7 @@ unsigned Utility::getFreePort() {
 
 void Utility::_exit(ExitCode code) { exit(static_cast<int>(code)); }
 
-static void setAddrinfo(addrinfo *addr, bool passive) {
+void Utility::setAddrinfo(addrinfo *addr, bool passive) {
   memset(addr, 0, sizeof(addrinfo));
   addr->ai_family = AF_INET; // IPv4
   addr->ai_socktype = SOCK_STREAM;

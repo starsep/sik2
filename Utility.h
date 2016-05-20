@@ -57,6 +57,9 @@ enum class ExitCode {
 };
 
 class Utility {
+private:
+  static void setAddrinfo(addrinfo *, bool);
+
 public:
   static void _exit(ExitCode);
 
