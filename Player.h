@@ -16,6 +16,7 @@ private:
   int byteCounter;
   int metadataCount;
   std::string metaData;
+  Socket sock;
 
   void cleanup(ExitCode exitCode);
 
@@ -23,9 +24,9 @@ private:
 
   void usage(const char **argv);
 
-  bool checkSocket(epoll_event &event, Socket &sock);
+  bool checkSocket(epoll_event &event);
 
-  Socket connect();
+  void connect();
 
   void handleMetadata();
 

@@ -13,7 +13,6 @@ void Master::getArguments(int argc, const char **argv) {
   }
   if (argc == 1) {
     port = Utility::getFreePort();
-    std::cerr << port << std::endl;
     return;
   }
   port = Utility::getPort(argv[1]);
@@ -23,10 +22,19 @@ void Master::getArguments(int argc, const char **argv) {
   }
 }
 
-Master::Master(int argc, const char **argv) {
+void Master::connect() {
+  unsigned lastPort = port;
+  sock = Socket::connectServer(port);
+  if (lastPort != port) {
+    std::cout << port << std::endl;
+  }
+}
+
+Master::Master(int argc, const char **argv) :
+    sock(0) {
   getArguments(argc, argv);
 }
 
 void Master::run() {
-
+  connect();
 }

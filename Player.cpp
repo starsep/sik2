@@ -30,7 +30,7 @@ void Player::usage(const char **argv) {
   cleanup(ExitCode::InvalidArguments);
 }
 
-bool Player::checkSocket(epoll_event &event, Socket &sock) {
+bool Player::checkSocket(epoll_event &event) {
   if (event.data.fd == sock.get()) {
     try {
       std::string data = sock.receiveShoutcast(metadata);
@@ -51,19 +51,9 @@ bool Player::checkSocket(epoll_event &event, Socket &sock) {
   return false;
 }
 
-Socket Player::connect() {
+void Player::connect() {
   std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
-  addrinfo hints;
-  addrinfo *result;
-
-  Utility::_getaddrinfo(host.c_str(), std::to_string(rPort).c_str(), &hints, &result);
-
-  Socket sock(result->ai_family, result->ai_socktype, result->ai_protocol);
-
-  sock.Connect(result->ai_addr, result->ai_addrlen);
-  freeaddrinfo(result);
-
-  return sock;
+  sock = Socket::connectClient(host, rPort);
 }
 
 void Player::handleMetadata() {
@@ -154,7 +144,8 @@ Player::Player(int argc, const char **argv) :
     stillHeader(true),
     metaInt(8192),
     byteCounter(0),
-    metadataCount(0) {
+    metadataCount(0),
+    sock(0) {
   getArguments(argc, argv);
 
 }
@@ -167,7 +158,7 @@ void Player::run() {
   std::ofstream ofstream(filename, std::ios_base::binary | std::ios_base::out);
   std::cout.rdbuf(ofstream.rdbuf());
 
-  Socket sock = connect();
+  connect();
   sock.makeNonBlocking();
   Epoll efd{};
   efd.addEvent(sock);
@@ -175,7 +166,7 @@ void Player::run() {
   while (true) {
     std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
     for (epoll_event &event : events) {
-      checkSocket(event, sock);
+      checkSocket(event);
     }
   }
 }

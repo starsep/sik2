@@ -7,8 +7,17 @@
 class Socket {
 private:
   int sock;
+
+  void Close();
+
+  bool Bind(const sockaddr *addr, socklen_t addrlen);
+
+  void Listen();
+
 public:
   Socket(int, int, int);
+
+  Socket(int);
 
   void Connect(const sockaddr *, socklen_t);
 
@@ -23,6 +32,9 @@ public:
   std::string receiveShoutcast(bool);
 
   void sendShoutcastHeader(const std::string &, bool);
+
+  static Socket connectServer(unsigned &port);
+  static Socket connectClient(const std::string &host, const unsigned port);
 };
 
 #endif //SIK2_SOCKET_H

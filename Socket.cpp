@@ -12,6 +12,10 @@
 #include <cstdlib>
 #include <cstring>
 
+Socket::Socket(int _sock) :
+    sock(_sock) {
+}
+
 Socket::Socket(int domain, int type, int protocol) {
   sock = socket(domain, type, protocol);
   if (sock < 0) {
@@ -85,4 +89,72 @@ void Socket::sendShoutcastHeader(const std::string &path, bool md) {
   request += "Connection: close\r\n"; // connection header
   request += "\r\n";                  // empty line
   Write(request.c_str(), request.size());
+}
+
+Socket Socket::connectServer(unsigned &port) {
+  addrinfo hints;
+  addrinfo *addr_result;
+
+  Utility::_getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &addr_result, true);
+
+  Socket result(0);
+  addrinfo *rp;
+  for (rp = addr_result; rp != nullptr; rp = rp->ai_next) {
+    result = Socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+
+    if (result.Bind(rp->ai_addr, rp->ai_addrlen)) {
+      break;
+    }
+
+    result.Close();
+  }
+
+  if (rp == nullptr) {
+    Utility::syserr("Could not bind\n");
+  }
+
+  freeaddrinfo(addr_result);
+
+  result.makeNonBlocking();
+  result.Listen();
+
+  if (port == 0) {
+    sockaddr_in serv_addr;
+    socklen_t len = sizeof(serv_addr);
+    if (getsockname(result.get(), (struct sockaddr *) &serv_addr, &len) == -1) {
+      Utility::syserr("getsockname");
+    }
+    port = ntohs(serv_addr.sin_port);
+  }
+  return result;
+}
+
+Socket Socket::connectClient(const std::string &host, const unsigned port) {
+  addrinfo hints;
+  addrinfo *addr_result;
+
+  Utility::_getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &addr_result);
+
+  Socket result(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
+
+  result.Connect(addr_result->ai_addr, addr_result->ai_addrlen);
+  freeaddrinfo(addr_result);
+  return result;
+}
+
+void Socket::Close() {
+  int err = close(sock);
+  if (err < 0) {
+    Utility::syserr("close");
+  }
+}
+
+void Socket::Listen() {
+  if (listen(sock, SOMAXCONN)) {
+    Utility::syserr("listen");
+  }
+}
+
+bool Socket::Bind(const sockaddr *addr, socklen_t addrlen) {
+  return bind(sock, addr, addrlen) == 0;
 }
