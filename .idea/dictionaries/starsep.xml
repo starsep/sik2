@@ -4,7 +4,13 @@
       <w>cout</w>
       <w>endl</w>
       <w>fcntl</w>
+      <w>getsockname</w>
+      <w>maxevents</w>
       <w>metaint</w>
+      <w>mplayer</w>
+      <w>polskieradio</w>
+      <w>precompiled</w>
+      <w>serv</w>
       <w>shoutcast</w>
       <w>sstream</w>
       <w>substr</w>
