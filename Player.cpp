@@ -152,7 +152,7 @@ void Player::handleHeader(const std::string &header) {
 
 Player::Player(int argc, const char **argv) :
     stillHeader(true),
-    metaInt(0),
+    metaInt(8192),
     byteCounter(0),
     metadataCount(0) {
   getArguments(argc, argv);
