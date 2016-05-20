@@ -26,8 +26,6 @@ private:
 
   bool checkSocket(epoll_event &event);
 
-  void connect();
-
   void handleMetadata();
 
   void printData(const std::string &data);

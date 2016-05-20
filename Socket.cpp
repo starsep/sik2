@@ -91,22 +91,21 @@ void Socket::sendShoutcastHeader(const std::string &path, bool md) {
   Write(request.c_str(), request.size());
 }
 
-Socket Socket::connectServer(unsigned &port) {
+void Socket::connectServer(unsigned &port) {
   addrinfo hints;
   addrinfo *addr_result;
 
   Utility::_getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &addr_result, true);
 
-  Socket result(0);
   addrinfo *rp;
   for (rp = addr_result; rp != nullptr; rp = rp->ai_next) {
-    result = Socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+    sock = Socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol).get();
 
-    if (result.Bind(rp->ai_addr, rp->ai_addrlen)) {
+    if (Bind(rp->ai_addr, rp->ai_addrlen)) {
       break;
     }
 
-    result.Close();
+    Close();
   }
 
   if (rp == nullptr) {
@@ -115,31 +114,31 @@ Socket Socket::connectServer(unsigned &port) {
 
   freeaddrinfo(addr_result);
 
-  result.makeNonBlocking();
-  result.Listen();
+  makeNonBlocking();
+  Listen();
 
   if (port == 0) {
     sockaddr_in serv_addr;
     socklen_t len = sizeof(serv_addr);
-    if (getsockname(result.get(), (struct sockaddr *) &serv_addr, &len) == -1) {
+    if (getsockname(get(), (struct sockaddr *) &serv_addr, &len) == -1) {
       Utility::syserr("getsockname");
     }
     port = ntohs(serv_addr.sin_port);
   }
-  return result;
 }
 
-Socket Socket::connectClient(const std::string &host, const unsigned port) {
+void Socket::connectClient(const std::string &host, const unsigned port) {
   addrinfo hints;
   addrinfo *addr_result;
 
   Utility::_getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &addr_result);
 
-  Socket result(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
+  *this = Socket(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
 
-  result.Connect(addr_result->ai_addr, addr_result->ai_addrlen);
+  Connect(addr_result->ai_addr, addr_result->ai_addrlen);
   freeaddrinfo(addr_result);
-  return result;
+
+  makeNonBlocking();
 }
 
 void Socket::Close() {

@@ -51,11 +51,6 @@ bool Player::checkSocket(epoll_event &event) {
   return false;
 }
 
-void Player::connect() {
-  std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
-  sock = Socket::connectClient(host, rPort);
-}
-
 void Player::handleMetadata() {
   boost::smatch what;
   const static boost::regex metaIntPattern(R"(StreamTitle='(.*?)';)");
@@ -158,8 +153,9 @@ void Player::run() {
   std::ofstream ofstream(filename, std::ios_base::binary | std::ios_base::out);
   std::cout.rdbuf(ofstream.rdbuf());
 
-  connect();
-  sock.makeNonBlocking();
+  std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
+  sock.connectClient(host, rPort);
+
   Epoll efd{};
   efd.addEvent(sock);
   sock.sendShoutcastHeader(path, metadata);

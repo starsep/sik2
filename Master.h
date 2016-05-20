@@ -12,8 +12,6 @@ private:
 
   void getArguments(int argc, const char **argv);
 
-  void connect();
-
 public:
   Master(int argc, const char **argv);
 

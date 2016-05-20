@@ -33,8 +33,9 @@ public:
 
   void sendShoutcastHeader(const std::string &, bool);
 
-  static Socket connectServer(unsigned &port);
-  static Socket connectClient(const std::string &host, const unsigned port);
+  void connectServer(unsigned &port);
+
+  void connectClient(const std::string &host, const unsigned port);
 };
 
 #endif //SIK2_SOCKET_H

@@ -22,19 +22,15 @@ void Master::getArguments(int argc, const char **argv) {
   }
 }
 
-void Master::connect() {
-  unsigned lastPort = port;
-  sock = Socket::connectServer(port);
-  if (lastPort != port) {
-    std::cout << port << std::endl;
-  }
-}
-
 Master::Master(int argc, const char **argv) :
     sock(0) {
   getArguments(argc, argv);
 }
 
 void Master::run() {
-  connect();
+  unsigned lastPort = port;
+  sock.connectServer(port);
+  if (lastPort != port) {
+    std::cout << port << std::endl;
+  }
 }
