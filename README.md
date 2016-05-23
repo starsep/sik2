@@ -79,6 +79,7 @@ Zanim zacznie się zadawać pytania prowadzącym, należy poczytać:
 - http://www.smackfu.com/stuff/programming/shoutcast.html
 - http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
 - http://www.listenlive.eu/poland.html
+- http://thecodeartist.blogspot.com/2013/02/shoutcast-internet-radio-protocol.html
 
 ## Część B
 
