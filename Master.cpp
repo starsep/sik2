@@ -32,7 +32,7 @@ Master::Master(int argc, const char **argv) :
 bool Master::checkSocket(epoll_event &event) {
   if (event.data.fd == sock.get()) {
     try {
-      std::string data = sock.receiveShoutcast(false);
+      std::string data = sock.receive();
       std::cerr << data << '\n';
     } catch (BadNetworkDataException) {
       std::cerr << "Incorrect data received from server. Exiting." << std::endl;

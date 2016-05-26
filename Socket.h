@@ -29,13 +29,17 @@ public:
 
   void makeNonBlocking();
 
-  std::string receiveShoutcast(bool);
+  std::string receive();
+
+  std::string receiveOnce();
 
   void sendShoutcastHeader(const std::string &, bool);
 
   void connectServer(unsigned &port);
 
   void connectClient(const std::string &host, const unsigned port);
+
+  void connectUdp(const unsigned port);
 };
 
 #endif //SIK2_SOCKET_H

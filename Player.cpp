@@ -30,11 +30,10 @@ void Player::usage(const char **argv) {
   cleanup(ExitCode::InvalidArguments);
 }
 
-bool Player::checkSocket(epoll_event &event) {
-  if (event.data.fd == sock.get()) {
+bool Player::checkShoutcastSocket(epoll_event &event) {
+  if (event.data.fd == shoutcast.get()) {
     try {
-      std::string data = sock.receiveShoutcast(metadata);
-      //      std::cerr << data.size() << std::endl;
+      std::string data = shoutcast.receive();
       if (stillHeader) {
         handleHeader(data);
       } else {
@@ -46,6 +45,16 @@ bool Player::checkSocket(epoll_event &event) {
     } catch (ClosedConnectionException) {
       cleanup(ExitCode::Ok);
     }
+    return true;
+  }
+  return false;
+}
+
+bool Player::checkUdpSocket(epoll_event &event) {
+  if (event.data.fd == udp.get()) {
+    std::string msg = udp.receiveOnce();
+    std::cerr << "UDP MSG: ";
+    std::cerr << msg;
     return true;
   }
   return false;
@@ -140,7 +149,8 @@ Player::Player(int argc, const char **argv) :
     metaInt(8192),
     byteCounter(0),
     metadataCount(0),
-    sock(0) {
+    shoutcast(0),
+    udp(0) {
   getArguments(argc, argv);
 
 }
@@ -154,15 +164,20 @@ void Player::run() {
   std::cout.rdbuf(ofstream.rdbuf());
 
   std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
-  sock.connectClient(host, rPort);
+  shoutcast.connectClient(host, rPort);
+  udp.connectUdp(mPort);
 
   Epoll efd{};
-  efd.addEvent(sock);
-  sock.sendShoutcastHeader(path, metadata);
+  efd.addEvent(shoutcast);
+  efd.addEvent(udp);
+  shoutcast.sendShoutcastHeader(path, metadata);
+
   while (true) {
     std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
     for (epoll_event &event : events) {
-      checkSocket(event);
+      if (!checkShoutcastSocket(event)) {
+        checkUdpSocket(event);
+      }
     }
   }
 }

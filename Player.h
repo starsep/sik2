@@ -16,7 +16,8 @@ private:
   int byteCounter;
   int metadataCount;
   std::string metaData;
-  Socket sock;
+  Socket shoutcast;
+  Socket udp;
 
   void cleanup(ExitCode exitCode);
 
@@ -24,7 +25,9 @@ private:
 
   void usage(const char **argv);
 
-  bool checkSocket(epoll_event &event);
+  bool checkShoutcastSocket(epoll_event &event);
+
+  bool checkUdpSocket(epoll_event &event);
 
   void handleMetadata();
 

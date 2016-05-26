@@ -64,7 +64,7 @@ ssize_t Socket::Read(void *buffer, size_t maxCount) {
   return count;
 }
 
-std::string Socket::receiveShoutcast(bool) {
+std::string Socket::receive() {
   static char buffer[BUFFER_LEN];
   std::string result = INVALID_DATA;
   while (true) {
@@ -78,6 +78,15 @@ std::string Socket::receiveShoutcast(bool) {
     result += std::string(buffer, count);
   }
   return result;
+}
+
+std::string Socket::receiveOnce() {
+  static char buffer[BUFFER_LEN];
+  ssize_t count = Read(buffer, BUFFER_LEN);
+  if (count == 0) {
+    throw ClosedConnectionException();
+  }
+  return std::string(buffer, count);
 }
 
 void Socket::sendShoutcastHeader(const std::string &path, bool md) {
@@ -139,6 +148,20 @@ void Socket::connectClient(const std::string &host, const unsigned port) {
   freeaddrinfo(addr_result);
 
   makeNonBlocking();
+}
+
+void Socket::connectUdp(const unsigned port) {
+  *this = Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+  sockaddr_in si_me;
+  memset((char *) &si_me, 0, sizeof(si_me));
+
+  si_me.sin_family = AF_INET;
+  si_me.sin_port = htons(port);
+  si_me.sin_addr.s_addr = htonl(INADDR_ANY);
+
+  Bind((struct sockaddr *) &si_me, sizeof(si_me));
+
 }
 
 void Socket::Close() {
