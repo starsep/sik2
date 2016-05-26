@@ -51,17 +51,26 @@ bool Player::checkShoutcastSocket(epoll_event &event) {
 }
 
 bool Player::checkUdpSocket(epoll_event &event) {
+  auto equalExceptWhitespaceOnEnd = [](const std::string &msg, const std::string &pat) {
+    boost::smatch what;
+    const boost::regex pattern(pat + R"(\s*)");
+    try {
+      return boost::regex_match(msg, what, pattern);
+    }
+    catch (...) {
+      return false;
+    }
+  };
   if (event.data.fd == udp.get()) {
     std::string msg = udp.receiveOnce();
-    std::cerr << "UDP MSG: ";
-    std::cerr << msg;
-    if (msg == "PAUSE\n") {
+//    std::cerr << "UDP MSG: |" << msg << "|";
+    if (equalExceptWhitespaceOnEnd(msg, "PAUSE")) {
       playing = false;
-    } else if(msg == "PLAY\n") {
+    } else if (equalExceptWhitespaceOnEnd(msg, "PLAY")) {
       playing = true;
-    } else if(msg == "QUIT\n") {
+    } else if (equalExceptWhitespaceOnEnd(msg, "QUIT")) {
       cleanup(ExitCode::Ok);
-    } else if(msg == "TITLE\n") {
+    } else if (equalExceptWhitespaceOnEnd(msg, "TITLE")) {
       std::cerr << "SENDING TITLE\n";
       //TODO
     }
@@ -166,7 +175,6 @@ Player::Player(int argc, const char **argv) :
     udp(0),
     playing(true) {
   getArguments(argc, argv);
-
 }
 
 
