@@ -18,6 +18,7 @@ private:
   std::string metaData;
   Socket shoutcast;
   Socket udp;
+  bool playing;
 
   void cleanup(ExitCode exitCode);
 

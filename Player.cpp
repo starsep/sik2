@@ -55,6 +55,16 @@ bool Player::checkUdpSocket(epoll_event &event) {
     std::string msg = udp.receiveOnce();
     std::cerr << "UDP MSG: ";
     std::cerr << msg;
+    if (msg == "PAUSE\n") {
+      playing = false;
+    } else if(msg == "PLAY\n") {
+      playing = true;
+    } else if(msg == "QUIT\n") {
+      cleanup(ExitCode::Ok);
+    } else if(msg == "TITLE\n") {
+      std::cerr << "SENDING TITLE\n";
+      //TODO
+    }
     return true;
   }
   return false;
@@ -91,6 +101,9 @@ void Player::subtractMetadata(std::string &data) {
 }
 
 void Player::handleData(std::string &data) {
+  if (!playing) {
+    return;
+  }
   stillHeader = false;
   if (metadata && metaInt > 0) {
     if (metadataCount > 0) {
@@ -150,7 +163,8 @@ Player::Player(int argc, const char **argv) :
     byteCounter(0),
     metadataCount(0),
     shoutcast(0),
-    udp(0) {
+    udp(0),
+    playing(true) {
   getArguments(argc, argv);
 
 }
