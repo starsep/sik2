@@ -171,8 +171,8 @@ Player::Player(int argc, const char **argv) :
     metaInt(0),
     byteCounter(0),
     metadataCount(0),
-    shoutcast(0),
-    udp(0),
+    shoutcast(),
+    udp(),
     playing(true) {
   getArguments(argc, argv);
 }

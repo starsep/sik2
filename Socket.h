@@ -19,6 +19,8 @@ public:
 
   Socket(int);
 
+  Socket();
+
   void Connect(const sockaddr *, socklen_t);
 
   void Write(const void *, size_t);

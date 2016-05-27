@@ -12,6 +12,11 @@
 #include <cstdlib>
 #include <cstring>
 
+Socket::Socket() :
+    sock(0) {
+
+}
+
 Socket::Socket(int _sock) :
     sock(_sock) {
 }
