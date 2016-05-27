@@ -81,9 +81,9 @@ bool Player::checkUdpSocket(epoll_event &event) {
 
 void Player::handleMetadata() {
   boost::smatch what;
-  const static boost::regex metaIntPattern(R"(StreamTitle='(.*?)';)");
+  const static boost::regex streamTitlePattern(R"(StreamTitle='(.*?)';)");
   try {
-    if (boost::regex_search(metaData, what, metaIntPattern)) {
+    if (boost::regex_search(metaData, what, streamTitlePattern)) {
       std::cerr << what[1] << std::endl;
     }
   }
