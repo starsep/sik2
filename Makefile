@@ -1,6 +1,6 @@
 COMPILER=g++
 CPPFLAGS=-Wall -Wunused -Wshadow -pedantic -O2 -std=c++11 -g#-DDEBUG
-LIBSFLAGS=-lboost_regex -lssh
+LIBSFLAGS=-lboost_regex -lssh -lpthread
 OFILES=Player.o Master.o Utility.o Socket.o Epoll.o
 all: master player
 
