@@ -168,7 +168,7 @@ void Player::handleHeader(const std::string &header) {
 
 Player::Player(int argc, const char **argv) :
     stillHeader(true),
-    metaInt(8192),
+    metaInt(0),
     byteCounter(0),
     metadataCount(0),
     shoutcast(0),
