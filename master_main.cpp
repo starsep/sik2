@@ -1,4 +1,4 @@
-#include "Master.h"
+#include "Master.hpp"
 
 int main(int argc, const char **argv) {
   Master master(argc, argv);

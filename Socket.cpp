@@ -1,5 +1,5 @@
-#include "Socket.h"
-#include "Utility.h"
+#include "Socket.hpp"
+#include "Utility.hpp"
 
 #include <fcntl.h>
 #include <sys/socket.h>

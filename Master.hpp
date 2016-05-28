@@ -1,9 +1,9 @@
 #ifndef SIK2_MASTER_H
 #define SIK2_MASTER_H
 
-#include "Utility.h"
-#include "Socket.h"
-#include "TelnetSession.h"
+#include "Utility.hpp"
+#include "Socket.hpp"
+#include "TelnetSession.hpp"
 
 #include <thread>
 #include <vector>

@@ -21,8 +21,8 @@
 #include <netdb.h>
 #include <sys/epoll.h>
 
-#include "Socket.h"
-#include "Epoll.h"
+#include "Socket.hpp"
+#include "Epoll.hpp"
 
 using File = int;
 

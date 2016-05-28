@@ -1,4 +1,6 @@
 *.o
+*.gch
+*.plist
 
 player
 master

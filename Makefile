@@ -10,8 +10,8 @@ player: player_main.cpp $(OFILES)
 master: master_main.cpp $(OFILES)
 	$(COMPILER) $(CPPFLAGS) -o $@ $^ $(LIBSFLAGS)
 
-$(OFILES): %.o: %.cpp
+$(OFILES): %.o: %.cpp %.hpp
 	$(COMPILER) $(CPPFLAGS) -c $< -o $@
 
 clean:
-	rm -f master player *.o
+	rm -f master player *.o *.gch *.plist

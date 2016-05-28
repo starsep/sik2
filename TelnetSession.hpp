@@ -1,9 +1,9 @@
 #ifndef SIK2_TELNETSESSION_H
 #define SIK2_TELNETSESSION_H
 
-#include "Socket.h"
-#include "Epoll.h"
-#include "Utility.h"
+#include "Socket.hpp"
+#include "Epoll.hpp"
+#include "Utility.hpp"
 
 #include <thread>
 

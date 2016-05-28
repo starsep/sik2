@@ -1,5 +1,5 @@
-#include "Utility.h"
-#include "Player.h"
+#include "Utility.hpp"
+#include "Player.hpp"
 
 void Player::cleanup(ExitCode exitCode) { Utility::_exit(exitCode); }
 

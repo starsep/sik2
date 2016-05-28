@@ -1,7 +1,7 @@
 #ifndef SIK2_PLAYER_H
 #define SIK2_PLAYER_H
 
-#include "Utility.h"
+#include "Utility.hpp"
 
 class Player {
 private:

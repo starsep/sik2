@@ -1,7 +1,7 @@
 #ifndef SIK2_EPOLL_H
 #define SIK2_EPOLL_H
 
-#include "Socket.h"
+#include "Socket.hpp"
 #include <sys/epoll.h>
 #include <vector>
 

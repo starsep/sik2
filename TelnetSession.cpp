@@ -1,4 +1,4 @@
-#include "TelnetSession.h"
+#include "TelnetSession.hpp"
 
 TelnetSession::TelnetSession(Socket c) :
     client(c.get()),
