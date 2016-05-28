@@ -1,9 +1,10 @@
 #ifndef SIK2_EPOLL_H
 #define SIK2_EPOLL_H
 
-#include "Socket.hpp"
 #include <sys/epoll.h>
 #include <vector>
+
+class Socket;
 
 class Epoll {
 private:

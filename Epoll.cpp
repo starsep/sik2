@@ -1,5 +1,6 @@
 #include "Epoll.hpp"
 #include "Utility.hpp"
+#include "Socket.hpp"
 
 #include <fcntl.h>
 #include <sys/socket.h>

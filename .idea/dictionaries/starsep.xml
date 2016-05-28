@@ -4,10 +4,12 @@
       <w>cout</w>
       <w>endl</w>
       <w>fcntl</w>
+      <w>fdset</w>
       <w>getsockname</w>
       <w>maxevents</w>
       <w>metaint</w>
       <w>mplayer</w>
+      <w>myset</w>
       <w>polskieradio</w>
       <w>precompiled</w>
       <w>serv</w>
@@ -15,6 +17,7 @@
       <w>sstream</w>
       <w>substr</w>
       <w>telnetsession</w>
+      <w>valopt</w>
     </words>
   </dictionary>
 </component>
