@@ -33,7 +33,7 @@ void Player::usage(const char **argv) {
 bool Player::checkShoutcastSocket(epoll_event &event) {
   if (event.data.fd == shoutcast.get()) {
     try {
-      std::string data = shoutcast.receive();
+      std::string data = shoutcast.receive(stillHeader ? MAX_HEADER_SHOUTCAST_SIZE : INF);
       if (stillHeader) {
         handleHeader(data);
       } else {
@@ -44,6 +44,9 @@ bool Player::checkShoutcastSocket(epoll_event &event) {
       cleanup(ExitCode::BadData);
     } catch (ClosedConnectionException) {
       cleanup(ExitCode::Ok);
+    } catch (TooMuchDataException) {
+      std::cerr << "Received too much data from shoutcast server. Exiting." << std::endl;
+      cleanup(ExitCode::BadData);
     }
     return true;
   }
@@ -74,7 +77,7 @@ void Player::handleMetadata() {
   const static boost::regex streamTitlePattern(R"(StreamTitle='(.*?)';)");
   try {
     if (boost::regex_search(metaData, result, streamTitlePattern)) {
-      std::cerr << result[1] << std::endl;
+      title = result[1];
     }
   }
   catch (...) {
@@ -84,8 +87,10 @@ void Player::handleMetadata() {
 
 
 void Player::printData(const std::string &data) {
-  std::cout << data;
-  std::cout.flush();
+  if (playing) {
+    std::cout << data;
+    std::cout.flush();
+  }
 }
 
 void Player::subtractMetadata(std::string &data) {
@@ -100,9 +105,6 @@ void Player::subtractMetadata(std::string &data) {
 }
 
 void Player::handleData(std::string &data) {
-  if (!playing) {
-    return;
-  }
   stillHeader = false;
   if (metadata && metaInt > 0) {
     if (metadataCount > 0) {
@@ -131,9 +133,9 @@ void Player::handleData(std::string &data) {
 }
 
 void Player::handleHeaderLine(const std::string &line) {
-  std::cerr << line << std::endl;
+  //std::cerr << line << std::endl;
   boost::smatch result;
-  const static boost::regex metaIntPattern(R"(icy-metaint:\s*(\d+).*)");
+  const static boost::regex metaIntPattern(R"(icy-metaint:\s*(\d+)\s*)");
   try {
     if (boost::regex_match(line, result, metaIntPattern)) {
       metaInt = std::stoi(result[1]);
@@ -161,6 +163,7 @@ Player::Player(int argc, const char **argv) :
     metaInt(0),
     byteCounter(0),
     metadataCount(0),
+    title(),
     shoutcast(),
     udp(),
     playing(true) {
@@ -175,7 +178,7 @@ void Player::run() {
   std::ofstream ofstream(filename, std::ios_base::binary | std::ios_base::out);
   std::cout.rdbuf(ofstream.rdbuf());
 
-  std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
+  //std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
   shoutcast.connectClient(host, rPort);
   udp.connectUdp(mPort);
 
@@ -184,8 +187,15 @@ void Player::run() {
   efd.addEvent(udp);
   shoutcast.sendShoutcastHeader(path, metadata);
 
+  std::cerr << OK;
+  std::cerr.flush();
+
   while (true) {
     std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
+    if (events.empty()) {
+      std::cerr << "Max time waiting for server exceeded (" << MAX_TIME << " seconds). Exiting." << std::endl;
+      cleanup(ExitCode::SystemError);
+    }
     for (epoll_event &event : events) {
       if (!checkShoutcastSocket(event)) {
         checkUdpSocket(event);

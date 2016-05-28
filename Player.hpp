@@ -16,6 +16,7 @@ private:
   int byteCounter;
   int metadataCount;
   std::string metaData;
+  std::string title;
   Socket shoutcast;
   Socket udp;
   bool playing;
