@@ -1,6 +1,6 @@
 #include "Utility.hpp"
 #include "Master.hpp"
-#include <libssh/libssh.h>
+#include <libssh2.h>
 
 void Master::cleanup(ExitCode exitCode) { Utility::_exit(exitCode); }
 
