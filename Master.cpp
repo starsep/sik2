@@ -111,11 +111,11 @@ static std::string sshExec(std::string hostname, std::string command) {
     }
     if (libssh2_agent_userauth(agent, username.c_str(), identity)) {
 
-      fprintf(stderr, "\tAuthentication with username %s and "
+      fprintf(stderr, "Authentication with username %s and "
                   "public key %s failed!\n",
               username.c_str(), identity->comment);
     } else {
-      fprintf(stderr, "\tAuthentication with username %s and "
+      fprintf(stderr, "Authentication with username %s and "
                   "public key %s succeeded!\n",
               username.c_str(), identity->comment);
       break;
@@ -129,20 +129,22 @@ static std::string sshExec(std::string hostname, std::string command) {
   LIBSSH2_CHANNEL *channel = libssh2_channel_open_session(session);
   if (libssh2_channel_exec(channel, command.c_str()) != 0) return "ERROR";
 
-  std::cout << "POSZLO\n";
+  //std::cout << "POSZLO\n";
 
   std::string buffer(1000, 0);
   std::string log;
   int size;
   while ((size = libssh2_channel_read(channel, buffer.begin().base(), buffer.length())) > 0) {
     log += std::string(buffer.begin(), buffer.begin() + size);
-    std::cout << std::string(buffer.begin(), buffer.begin() + size) << "\n";
+    //std::cout << std::string(buffer.begin(), buffer.begin() + size) << "\n";
   }
 
-  if (size == 0)
+  /*if (size == 0) {
     std::cout << "OK Player finished.\n" + log;
-  else
+  }
+  else {
     std::cout << "ERROR Connection interrupted.\n" + log;
+  }*/
 
   libssh2_channel_close(channel);
   libssh2_channel_free(channel);
@@ -159,7 +161,7 @@ void Master::run() {
     std::cout << port << std::endl;
   }
 
-  std::cerr << sshExec("students.mimuw.edu.pl", "if [ -z \"$SSH_AUTH_SOCK\" ] ; then eval `ssh-agent`; ssh-add fi; ls -l") << "\n";
+  std::cerr << sshExec("students.mimuw.edu.pl", "ls -l") << "\n";
 
   Epoll efd{};
   efd.addEvent(sock);
