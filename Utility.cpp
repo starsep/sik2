@@ -68,3 +68,7 @@ bool Utility::equalExceptWhitespaceOnEnd(const std::string &msg, const std::stri
     return false;
   }
 }
+
+bool Utility::startsWith(const std::string &s, const std::string &pref) {
+  return s.substr(0, pref.size()) == pref;
+}

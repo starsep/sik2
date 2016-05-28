@@ -83,6 +83,8 @@ public:
   static unsigned getFreePort();
 
   static bool equalExceptWhitespaceOnEnd(const std::string &msg, const std::string &pat);
+
+  static bool startsWith(const std::string &s, const std::string &pref);
 };
 
 #endif // SIK2_UTILITY_H
