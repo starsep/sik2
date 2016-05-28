@@ -15,7 +15,7 @@ void Master::getArguments(int argc, const char **argv) {
     usage(argv);
   }
   if (argc == 1) {
-    port = Utility::getFreePort();
+    port = INVALID_PORT;
     return;
   }
   port = Utility::getPort(argv[1]);

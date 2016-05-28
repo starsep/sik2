@@ -33,10 +33,6 @@ unsigned Utility::getPort(const char *cPort) {
   return (port < MIN_PORT || port > MAX_PORT) ? INVALID_PORT : port;
 }
 
-unsigned Utility::getFreePort() {
-  return INVALID_PORT; // TODO
-}
-
 void Utility::_exit(ExitCode code) { exit(static_cast<int>(code)); }
 
 void Utility::setAddrinfo(addrinfo *addr, bool passive) {

@@ -32,6 +32,9 @@ class ClosedConnectionException {
 class BadNetworkDataException {
 };
 
+class TooMuchDataException {
+};
+
 const unsigned INVALID_PORT = 0;
 const unsigned MIN_PORT = 1;
 const unsigned MAX_PORT = (1 << 16) - 1;
@@ -48,6 +51,8 @@ const std::string QUIT = "QUIT";
 const std::string AT = "AT";
 const std::string START = "START";
 
+const std::string OK = "OK\n";
+
 const int HEADER_EVENTS = 2;
 
 const int BUFFER_LEN = 10000;
@@ -56,6 +61,7 @@ const int INF = -1;
 const int MAX_TIME = 5000; //ms
 const int MAX_SOCKETS_PLAYER = 2;
 const int MAX_EVENTS_TELNET = 10;
+const int MAX_HEADER_SHOUTCAST_SIZE = 10000000; //10MB
 
 const File stdOutFile = 1;
 
@@ -79,8 +85,6 @@ public:
                            bool = false);
 
   static unsigned getPort(const char *);
-
-  static unsigned getFreePort();
 
   static bool equalExceptWhitespaceOnEnd(const std::string &msg, const std::string &pat);
 
