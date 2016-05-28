@@ -4,6 +4,8 @@ LIBSFLAGS=-lboost_regex -lssh -lpthread
 OFILES=Player.o Master.o Utility.o Socket.o Epoll.o TelnetSession.o
 all: master player
 
+.PHONY: clean analyze
+
 player: player_main.cpp $(OFILES)
 	$(COMPILER) $(CPPFLAGS) -o $@ $^ $(LIBSFLAGS)
 
@@ -15,3 +17,6 @@ $(OFILES): %.o: %.cpp %.hpp
 
 clean:
 	rm -f master player *.o *.gch *.plist
+
+analyze:
+	clang++ -std=c++11 --analyze *.cpp *.hpp
