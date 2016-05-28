@@ -46,6 +46,10 @@ void Socket::Write(const void *buf, size_t count) {
   }
 }
 
+void Socket::Write(const std::string &s) {
+  Write(s.c_str(), s.size());
+}
+
 int Socket::get() const {
   return sock;
 }
@@ -106,7 +110,7 @@ void Socket::sendShoutcastHeader(const std::string &path, bool md) {
              "\r\n";                  // whether we want metadata
   request += "Connection: close\r\n"; // connection header
   request += "\r\n";                  // empty line
-  Write(request.c_str(), request.size());
+  Write(request);
 }
 
 void Socket::connectServer(unsigned &port) {

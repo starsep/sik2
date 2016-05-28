@@ -27,6 +27,8 @@ public:
 
   void Write(const void *, size_t);
 
+  void Write(const std::string &s);
+
   ssize_t Read(void *, size_t);
 
   int get() const;
