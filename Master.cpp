@@ -84,52 +84,20 @@ static std::string sshExec(std::string hostname, std::string command) {
     Utility::syserr("libssh2_session_handshake");
   }
 
-  /* Connect to the ssh-agent */
-  LIBSSH2_AGENT *agent = libssh2_agent_init(session);
-  int rc;
-  libssh2_agent_publickey *identity = nullptr, *prev_identity = nullptr;
+  std::string id_rsa_pub = homeDirectory + "/.ssh/id_rsa.pub";
+  std::string id_rsa = homeDirectory + "/.ssh/id_rsa";
 
-  if (!agent) {
-    fprintf(stderr, "Failure initializing ssh-agent support\n");
-  }
-  if (libssh2_agent_connect(agent)) {
-    Utility::syserr("Failure connecting to ssh-agent");
-  }
-  if (libssh2_agent_list_identities(agent)) {
-    fprintf(stderr, "Failure requesting identities to ssh-agent\n");
+  if (libssh2_userauth_publickey_fromfile(session, username.c_str(), id_rsa_pub.c_str(), id_rsa.c_str(), "") != 0) {
+    char *ptr;
+    int length;
+    libssh2_session_last_error(session, &ptr, &length, 1);
+    free(ptr);
+    return "ERROR";
   }
 
-  while (true) {
-    rc = libssh2_agent_get_identity(agent, &identity, prev_identity);
-    if (rc == 1) {
-      break;
-    }
-    if (rc < 0) {
-      fprintf(stderr,
-              "Failure obtaining identity from ssh-agent support\n");
-      rc = 1;
-    }
-    if (libssh2_agent_userauth(agent, username.c_str(), identity)) {
-
-      fprintf(stderr, "Authentication with username %s and "
-                  "public key %s failed!\n",
-              username.c_str(), identity->comment);
-    } else {
-      fprintf(stderr, "Authentication with username %s and "
-                  "public key %s succeeded!\n",
-              username.c_str(), identity->comment);
-      break;
-    }
-    prev_identity = identity;
-  }
-  if (rc) {
-    fprintf(stderr, "Couldn't continue authentication\n");
-  }
 
   LIBSSH2_CHANNEL *channel = libssh2_channel_open_session(session);
   if (libssh2_channel_exec(channel, command.c_str()) != 0) return "ERROR";
-
-  //std::cout << "POSZLO\n";
 
   std::string buffer(1000, 0);
   std::string log;
@@ -161,7 +129,7 @@ void Master::run() {
     std::cout << port << std::endl;
   }
 
-  std::cerr << sshExec("students.mimuw.edu.pl", "ls -l") << "\n";
+  std::cerr << sshExec("students.mimuw.edu.pl", "ls -l");
 
   Epoll efd{};
   efd.addEvent(sock);
