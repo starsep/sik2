@@ -40,12 +40,22 @@ const std::string stdOutFilename = "/dev/stdout";
 const std::string YES = "yes";
 const std::string NO = "no";
 const std::string INVALID_DATA = "";
+
+const std::string PLAY = "PLAY";
+const std::string PAUSE = "PAUSE";
+const std::string TITLE = "TITLE";
+const std::string QUIT = "QUIT";
+const std::string AT = "AT";
+const std::string START = "START";
+
 const int HEADER_EVENTS = 2;
 
 const int BUFFER_LEN = 10000;
 
+const int INF = -1;
 const int MAX_TIME = 5000; //ms
 const int MAX_SOCKETS_PLAYER = 2;
+const int MAX_EVENTS_TELNET = 10;
 
 const File stdOutFile = 1;
 
@@ -71,6 +81,8 @@ public:
   static unsigned getPort(const char *);
 
   static unsigned getFreePort();
+
+  static bool equalExceptWhitespaceOnEnd(const std::string &msg, const std::string &pat);
 };
 
 #endif // SIK2_UTILITY_H

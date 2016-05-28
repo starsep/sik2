@@ -57,3 +57,14 @@ void Utility::_getaddrinfo(const char *node, const char *service, addrinfo *hint
     Utility::syserr("getaddrinfo: %s", gai_strerror(err));
   }
 }
+
+bool Utility::equalExceptWhitespaceOnEnd(const std::string &msg, const std::string &pat) {
+  boost::smatch result;
+  const boost::regex pattern(pat + R"(\s*)");
+  try {
+    return boost::regex_match(msg, result, pattern);
+  }
+  catch (...) {
+    return false;
+  }
+}

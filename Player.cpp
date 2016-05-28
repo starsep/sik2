@@ -51,26 +51,16 @@ bool Player::checkShoutcastSocket(epoll_event &event) {
 }
 
 bool Player::checkUdpSocket(epoll_event &event) {
-  auto equalExceptWhitespaceOnEnd = [](const std::string &msg, const std::string &pat) {
-    boost::smatch what;
-    const boost::regex pattern(pat + R"(\s*)");
-    try {
-      return boost::regex_match(msg, what, pattern);
-    }
-    catch (...) {
-      return false;
-    }
-  };
   if (event.data.fd == udp.get()) {
     std::string msg = udp.receiveOnce();
 //    std::cerr << "UDP MSG: |" << msg << "|";
-    if (equalExceptWhitespaceOnEnd(msg, "PAUSE")) {
+    if (Utility::equalExceptWhitespaceOnEnd(msg, PAUSE)) {
       playing = false;
-    } else if (equalExceptWhitespaceOnEnd(msg, "PLAY")) {
+    } else if (Utility::equalExceptWhitespaceOnEnd(msg, PLAY)) {
       playing = true;
-    } else if (equalExceptWhitespaceOnEnd(msg, "QUIT")) {
+    } else if (Utility::equalExceptWhitespaceOnEnd(msg, QUIT)) {
       cleanup(ExitCode::Ok);
-    } else if (equalExceptWhitespaceOnEnd(msg, "TITLE")) {
+    } else if (Utility::equalExceptWhitespaceOnEnd(msg, TITLE)) {
       std::cerr << "SENDING TITLE\n";
       //TODO
     }
@@ -80,11 +70,11 @@ bool Player::checkUdpSocket(epoll_event &event) {
 }
 
 void Player::handleMetadata() {
-  boost::smatch what;
+  boost::smatch result;
   const static boost::regex streamTitlePattern(R"(StreamTitle='(.*?)';)");
   try {
-    if (boost::regex_search(metaData, what, streamTitlePattern)) {
-      std::cerr << what[1] << std::endl;
+    if (boost::regex_search(metaData, result, streamTitlePattern)) {
+      std::cerr << result[1] << std::endl;
     }
   }
   catch (...) {
@@ -126,7 +116,7 @@ void Player::handleData(std::string &data) {
       byteCounter += dataSize;
       byteCounter %= metaInt;
       data = data.substr(dataSize, data.size());
-      metadataCount = (unsigned char) data[0] * 16;
+      metadataCount = static_cast<unsigned char>(data[0]) * 16;
       data = data.substr(1, data.size());
       subtractMetadata(data);
       printData(data);
@@ -142,11 +132,11 @@ void Player::handleData(std::string &data) {
 
 void Player::handleHeaderLine(const std::string &line) {
   std::cerr << line << std::endl;
-  boost::smatch what;
+  boost::smatch result;
   const static boost::regex metaIntPattern(R"(icy-metaint:\s*(\d+).*)");
   try {
-    if (boost::regex_match(line, what, metaIntPattern)) {
-      metaInt = std::stoi(what[1]);
+    if (boost::regex_match(line, result, metaIntPattern)) {
+      metaInt = std::stoi(result[1]);
     }
   }
   catch (...) {

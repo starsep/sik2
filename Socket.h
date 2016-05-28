@@ -21,6 +21,8 @@ public:
 
   Socket();
 
+  Socket(const Socket &);
+
   void Connect(const sockaddr *, socklen_t);
 
   void Write(const void *, size_t);
@@ -42,6 +44,10 @@ public:
   void connectClient(const std::string &host, const unsigned port);
 
   void connectUdp(const unsigned port);
+
+  Socket Accept(sockaddr *, socklen_t *);
+
+  const Socket operator=(Socket s);
 };
 
 #endif //SIK2_SOCKET_H

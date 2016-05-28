@@ -28,6 +28,10 @@ Socket::Socket(int domain, int type, int protocol) {
   }
 }
 
+Socket::Socket(const Socket &c) :
+    sock(c.sock) {
+}
+
 void Socket::Connect(const sockaddr *addr, socklen_t addrlen) {
   int err = connect(sock, addr, addrlen);
   if (err < 0) {
@@ -134,7 +138,7 @@ void Socket::connectServer(unsigned &port) {
   if (port == 0) {
     sockaddr_in serv_addr;
     socklen_t len = sizeof(serv_addr);
-    if (getsockname(get(), (struct sockaddr *) &serv_addr, &len) == -1) {
+    if (getsockname(get(), reinterpret_cast<sockaddr *>(&serv_addr), &len) == -1) {
       Utility::syserr("getsockname");
     }
     port = ntohs(serv_addr.sin_port);
@@ -159,13 +163,13 @@ void Socket::connectUdp(const unsigned port) {
   *this = Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
   sockaddr_in si_me;
-  memset((char *) &si_me, 0, sizeof(si_me));
+  memset(&si_me, 0, sizeof(si_me));
 
   si_me.sin_family = AF_INET;
   si_me.sin_port = htons(port);
   si_me.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  Bind((struct sockaddr *) &si_me, sizeof(si_me));
+  Bind(reinterpret_cast<sockaddr *>(&si_me), sizeof(si_me));
 
 }
 
@@ -184,4 +188,15 @@ void Socket::Listen() {
 
 bool Socket::Bind(const sockaddr *addr, socklen_t addrlen) {
   return bind(sock, addr, addrlen) == 0;
+}
+
+Socket Socket::Accept(sockaddr *addr, socklen_t *addrlen) {
+  Socket result{};
+  result.sock = accept(sock, addr, addrlen);
+  return result;
+}
+
+const Socket Socket::operator=(Socket s) {
+  sock = s.sock;
+  return *this;
 }

@@ -1,5 +1,6 @@
 #include "Utility.h"
 #include "Master.h"
+#include <libssh/libssh.h>
 
 void Master::cleanup(ExitCode exitCode) { Utility::_exit(exitCode); }
 
@@ -29,16 +30,27 @@ Master::Master(int argc, const char **argv) :
   getArguments(argc, argv);
 }
 
-bool Master::checkSocket(epoll_event &event) {
+void Master::newConnectionDebug(Socket &client, sockaddr *in_addr, socklen_t *in_len) {
+  char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+  if (getnameinfo(in_addr, *in_len, hbuf, sizeof hbuf, sbuf, sizeof sbuf,
+                  NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
+    std::cerr << "Connection with " << client.get() << " (host=" << hbuf
+    << ", port=" << sbuf << ")" << std::endl;
+    std::cerr.flush();
+  }
+}
+
+bool Master::checkListeningSocket(epoll_event &event) {
   if (event.data.fd == sock.get()) {
-    try {
-      std::string data = sock.receive();
-      std::cerr << data << '\n';
-    } catch (BadNetworkDataException) {
-      std::cerr << "Incorrect data received from server. Exiting." << std::endl;
-      cleanup(ExitCode::BadData);
-    } catch (ClosedConnectionException) {
-      cleanup(ExitCode::Ok);
+    while (true) {
+      sockaddr in_addr;
+      socklen_t in_len = sizeof in_addr;
+      Socket client = sock.Accept(&in_addr, &in_len);
+      if (client.get() == -1) {
+        break;
+      }
+      telnetSessions.push_back(new TelnetSession(client));
+      newConnectionDebug(client, &in_addr, &in_len);
     }
     return true;
   }
@@ -57,8 +69,14 @@ void Master::run() {
   while (true) {
     std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
     for (epoll_event &event : events) {
-      checkSocket(event);
+      checkListeningSocket(event);
     }
   }
 
+}
+
+Master::~Master() {
+  for (TelnetSession *t : telnetSessions) {
+    delete t;
+  }
 }
