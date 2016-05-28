@@ -77,7 +77,7 @@ ssize_t Socket::Read(void *buffer, size_t maxCount) {
   return count;
 }
 
-std::string Socket::receive() {
+std::string Socket::receive(int max_len) {
   static char buffer[BUFFER_LEN];
   std::string result = INVALID_DATA;
   while (true) {
@@ -89,6 +89,9 @@ std::string Socket::receive() {
       throw ClosedConnectionException();
     }
     result += std::string(buffer, count);
+    if (max_len != INF && static_cast<int>(result.size()) >= max_len) {
+      throw TooMuchDataException();
+    }
   }
   return result;
 }
@@ -159,7 +162,6 @@ void Socket::connectClient(const std::string &host, const unsigned port) {
 
   Connect(addr_result->ai_addr, addr_result->ai_addrlen);
   freeaddrinfo(addr_result);
-
   makeNonBlocking();
 }
 

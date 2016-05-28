@@ -1,6 +1,8 @@
 #ifndef SIK2_SOCKET_H
 #define SIK2_SOCKET_H
 
+#include "Utility.hpp"
+
 #include <netdb.h>
 #include <string>
 
@@ -35,7 +37,7 @@ public:
 
   void makeNonBlocking();
 
-  std::string receive();
+  std::string receive(int max_len = -1);
 
   std::string receiveOnce();
 
