@@ -14,6 +14,7 @@
       <w>shoutcast</w>
       <w>sstream</w>
       <w>substr</w>
+      <w>telnetsession</w>
     </words>
   </dictionary>
 </component>
