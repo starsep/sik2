@@ -13,7 +13,8 @@
 #include <cstring>
 
 void Epoll::addEvent(const Socket &sock) {
-  epoll_event event{};
+  epoll_event event;
+  memset(&event, 0, sizeof(epoll_event));
   event.data.fd = sock.get();
   event.events = EPOLLIN | EPOLLET;
   if (epoll_ctl(efd, EPOLL_CTL_ADD, sock.get(), &event) == -1) {
