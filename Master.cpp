@@ -159,7 +159,7 @@ void Master::run() {
     std::cout << port << std::endl;
   }
 
-  std::cerr << sshExec("students.mimuw.edu.pl", "ls -l") << "\n";
+  std::cerr << sshExec("students.mimuw.edu.pl", "eval `ssh-agent`; ssh-add; ls -l") << "\n";
 
   Epoll efd{};
   efd.addEvent(sock);
