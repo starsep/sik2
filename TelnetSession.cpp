@@ -24,6 +24,9 @@ void TelnetSession::run() {
 }
 
 bool TelnetSession::checkStart(const std::string &command) {
+  if (!Utility::startsWith(command, START)) {
+    return false;
+  }
   boost::smatch result;
   const static boost::regex startPattern(START + R"(\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\l{2,3})\s*)");
   try {
@@ -35,19 +38,29 @@ bool TelnetSession::checkStart(const std::string &command) {
       std::string file = result[5];
       int mPort = std::stoi(result[6]);
       std::string metadata = result[7];
+      if (metadata != NO && metadata != YES) {
+        static const std::string INVALID_START_METADATA = "ERROR metadata option must be " + YES + " or " + NO + "\n";
+        client.Write(INVALID_START_METADATA);
+        return true;
+      }
       std::cerr << START << "ing player @ " << computer <<
       " with parameters: " << host << " " << path << " " << rPort << " " << file << " " << mPort << " " << metadata <<
       "\n";
       return true;
     }
-    return false;
   }
   catch (...) {
-    return false;
   }
+  static const std::string INVALID_START =
+      "ERROR in " + START + " command. Usage: " + START + " computer host path r-port file m-port metadata\n";
+  client.Write(INVALID_START);
+  return true;
 }
 
 bool TelnetSession::checkAt(const std::string &command) {
+  if (!Utility::startsWith(command, AT)) {
+    return false;
+  }
   boost::smatch result;
   const static boost::regex atPattern(
       AT + R"(\s+(\d{2})\.(\d{2})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\l{2,3})\s*)");
@@ -64,19 +77,25 @@ bool TelnetSession::checkAt(const std::string &command) {
       int mPort = std::stoi(result[9]);
       std::string metadata = result[10];
       std::cerr << AT << "ing player @ " << computer <<
-      " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << host << " " << path << " " << rPort <<
+      " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << host << " " << path << " " <<
+      rPort <<
       " " << file << " " << mPort << " " << metadata <<
       "\n";
       return true;
     }
-    return false;
   }
   catch (...) {
-    return false;
   }
+  static const std::string INVALID_AT =
+      "ERROR in " + AT + " command. Usage: " + AT + " HH.MM M computer host path r-port file m-port metadata\n";
+  client.Write(INVALID_AT);
+  return true;
 }
 
 bool TelnetSession::checkPlay(const std::string &command) {
+  if (!Utility::startsWith(command, PLAY)) {
+    return false;
+  }
   boost::smatch result;
   const static boost::regex playPattern(PLAY + R"(\s+(\d+)\s*)");
   try {
@@ -84,14 +103,19 @@ bool TelnetSession::checkPlay(const std::string &command) {
       std::cerr << PLAY << " " << result[1] << "\n";
       return true;
     }
-    return false;
   }
   catch (...) {
-    return false;
   }
+  static const std::string INVALID_PLAY =
+      "ERROR in " + PLAY + " command. Usage: " + PLAY + " id\n";
+  client.Write(INVALID_PLAY);
+  return true;
 }
 
 bool TelnetSession::checkPause(const std::string &command) {
+  if (!Utility::startsWith(command, PAUSE)) {
+    return false;
+  }
   boost::smatch result;
   const static boost::regex pausePattern(PAUSE + R"(\s+(\d+)\s*)");
   try {
@@ -99,14 +123,19 @@ bool TelnetSession::checkPause(const std::string &command) {
       std::cerr << PAUSE << " " << result[1] << "\n";
       return true;
     }
-    return false;
   }
   catch (...) {
-    return false;
   }
+  static const std::string INVALID_PAUSE =
+      "ERROR in " + PAUSE + " command. Usage: " + PAUSE + " id\n";
+  client.Write(INVALID_PAUSE);
+  return true;
 }
 
 bool TelnetSession::checkQuit(const std::string &command) {
+  if (!Utility::startsWith(command, QUIT)) {
+    return false;
+  }
   boost::smatch result;
   const static boost::regex quitPattern(QUIT + R"(\s+(\d+)\s*)");
   try {
@@ -114,14 +143,19 @@ bool TelnetSession::checkQuit(const std::string &command) {
       std::cerr << QUIT << " " << result[1] << "\n";
       return true;
     }
-    return false;
   }
   catch (...) {
-    return false;
   }
+  static const std::string INVALID_QUIT =
+      "ERROR in " + QUIT + " command. Usage: " + QUIT + " id\n";
+  client.Write(INVALID_QUIT);
+  return true;
 }
 
 bool TelnetSession::checkTitle(const std::string &command) {
+  if (!Utility::startsWith(command, TITLE)) {
+    return false;
+  }
   boost::smatch result;
   const static boost::regex titlePattern(TITLE + R"(\s+(\d+)\s*)");
   try {
@@ -129,11 +163,13 @@ bool TelnetSession::checkTitle(const std::string &command) {
       std::cerr << TITLE << " " << result[1] << "\n";
       return true;
     }
-    return false;
   }
   catch (...) {
-    return false;
   }
+  static const std::string INVALID_TITLE =
+      "ERROR in " + TITLE + " command. Usage: " + TITLE + " id\n";
+  client.Write(INVALID_TITLE);
+  return true;
 }
 
 bool TelnetSession::checkCommand(const std::string &c) {
@@ -151,8 +187,8 @@ void TelnetSession::checkTelnetEvent(epoll_event &event) {
       return;
     }
     if (!checkCommand(msg)) {
-      static const std::string INVALID_COMMAND = "ERROR Invalid command\n";
-      client.Write(INVALID_COMMAND.c_str(), INVALID_COMMAND.size());
+      static const std::string INVALID_COMMAND = "ERROR Invalid command. Available: AT START PLAY PAUSE QUIT TITLE\n";
+      client.Write(INVALID_COMMAND);
     }
   }
 }
