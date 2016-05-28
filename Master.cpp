@@ -93,7 +93,7 @@ static std::string sshExec(std::string hostname, std::string command) {
     fprintf(stderr, "Failure initializing ssh-agent support\n");
   }
   if (libssh2_agent_connect(agent)) {
-    syserr("Failure connecting to ssh-agent");
+    Utility::syserr("Failure connecting to ssh-agent");
   }
   if (libssh2_agent_list_identities(agent)) {
     fprintf(stderr, "Failure requesting identities to ssh-agent\n");
