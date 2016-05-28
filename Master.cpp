@@ -91,21 +91,16 @@ static std::string sshExec(std::string hostname, std::string command) {
 
   if (!agent) {
     fprintf(stderr, "Failure initializing ssh-agent support\n");
-    rc = 1;
   }
   if (libssh2_agent_connect(agent)) {
-
-    fprintf(stderr, "Failure connecting to ssh-agent\n");
-    rc = 1;
+    syserr("Failure connecting to ssh-agent");
   }
   if (libssh2_agent_list_identities(agent)) {
-
     fprintf(stderr, "Failure requesting identities to ssh-agent\n");
-    rc = 1;
   }
-  while (1) {
-    rc = libssh2_agent_get_identity(agent, &identity, prev_identity);
 
+  while (true) {
+    rc = libssh2_agent_get_identity(agent, &identity, prev_identity);
     if (rc == 1)
       break;
     if (rc < 0) {
