@@ -99,11 +99,15 @@ static std::string sshExec(std::string hostname, std::string command) {
     fprintf(stderr, "Failure requesting identities to ssh-agent\n");
   }
 
-  while (rc != 1) {
+  while (true) {
     rc = libssh2_agent_get_identity(agent, &identity, prev_identity);
+    if (rc == 1) {
+      break;
+    }
     if (rc < 0) {
       fprintf(stderr,
               "Failure obtaining identity from ssh-agent support\n");
+      rc = 1;
     }
     if (libssh2_agent_userauth(agent, username.c_str(), identity)) {
 
