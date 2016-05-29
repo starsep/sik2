@@ -10,6 +10,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 void Utility::Utility::syserr(const char *fmt, ...) {
   va_list fmt_args;
@@ -67,4 +68,21 @@ bool Utility::equalExceptWhitespaceOnEnd(const std::string &msg, const std::stri
 
 bool Utility::startsWith(const std::string &s, const std::string &pref) {
   return s.substr(0, pref.size()) == pref;
+}
+
+int Utility::currentMinutes() {
+  char buf[3];
+  time_t now = time(nullptr);
+  tm tstruct;
+  tstruct = *localtime(&now);
+
+  strftime(buf, sizeof(buf), "%H", &tstruct);
+  buf[2] = '\0';
+  int result = 60 * std::stoi(buf);
+
+  strftime(buf, sizeof(buf), "%M", &tstruct);
+  buf[2] = '\0';
+  result += std::stoi(buf);
+
+  return result;
 }

@@ -89,6 +89,8 @@ public:
   static bool equalExceptWhitespaceOnEnd(const std::string &msg, const std::string &pat);
 
   static bool startsWith(const std::string &s, const std::string &pref);
+
+  static int currentMinutes();
 };
 
 #endif // SIK2_UTILITY_HPP

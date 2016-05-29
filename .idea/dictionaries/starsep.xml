@@ -1,6 +1,7 @@
 <component name="ProjectDictionaryState">
   <dictionary name="starsep">
     <words>
+      <w>chrono</w>
       <w>cout</w>
       <w>endl</w>
       <w>fcntl</w>
@@ -18,6 +19,7 @@
       <w>sstream</w>
       <w>substr</w>
       <w>telnetsession</w>
+      <w>tstruct</w>
       <w>valopt</w>
     </words>
   </dictionary>
