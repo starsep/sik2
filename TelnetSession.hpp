@@ -10,10 +10,27 @@
 
 class TelnetSession {
 private:
+  struct TimedEvent {
+    int hh;
+    int mm;
+    int m;
+    std::string computer;
+    std::string parameters;
+
+    int minutes() const {
+      return 60 * hh + mm;
+    }
+
+    bool operator<(const TimedEvent &b) const {
+      return minutes() < b.minutes();
+    }
+  };
+
   Socket client;
   bool running;
   std::thread *thread;
   std::vector<PlayerExecution *> playerExecutions;
+  std::vector <TimedEvent> timedEvents;
 
   void run();
 

@@ -4,7 +4,8 @@ TelnetSession::TelnetSession(Socket c) :
     client(c.get()),
     running(true),
     thread(new std::thread(&TelnetSession::run, this)),
-    playerExecutions() {
+    playerExecutions(),
+    timedEvents() {
 }
 
 TelnetSession::TelnetSession(const TelnetSession &t) {
@@ -70,6 +71,18 @@ bool TelnetSession::checkAt(const std::string &command) {
     if (boost::regex_match(command, result, atPattern)) {
       int hh = std::stoi(result[1]);
       int mm = std::stoi(result[2]);
+      if (hh > 23) {
+        static const std::string INVALID_AT_HH =
+            "ERROR in " + AT + " command. HH is too large\n";
+        client.Write(INVALID_AT_HH);
+        return true;
+      }
+      if (mm > 59) {
+        static const std::string INVALID_AT_MM =
+            "ERROR in " + AT + " command. MM is too large\n";
+        client.Write(INVALID_AT_MM);
+        return true;
+      }
       int m = std::stoi(result[3]);
       std::string computer = result[4];
       std::string host = result[5];
@@ -78,11 +91,20 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::string file = result[8];
       int mPort = std::stoi(result[9]);
       std::string metadata = result[10];
+      if (metadata != NO && metadata != YES) {
+        static const std::string INVALID_AT_METADATA = "ERROR metadata option must be " + YES + " or " + NO + "\n";
+        client.Write(INVALID_AT_METADATA);
+        return true;
+      }
+      std::string parameters;
+      for (int i = 5; i <= 10; i++) {
+        parameters += result[i] + " ";
+      }
       std::cerr << AT << "ing player @ " << computer <<
-      " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << host << " " << path << " " <<
-      rPort <<
-      " " << file << " " << mPort << " " << metadata <<
+      " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << parameters <<
       "\n";
+      timedEvents.push_back({hh, mm, m, computer, parameters});
+      std::sort(timedEvents.begin(), timedEvents.end());
       return true;
     }
   }
