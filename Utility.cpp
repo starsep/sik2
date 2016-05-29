@@ -20,7 +20,7 @@ void Utility::Utility::syserr(const char *fmt, ...) {
   vfprintf(stderr, fmt, fmt_args);
   va_end(fmt_args);
   fprintf(stderr, " (%d; %s)\n", errno, strerror(errno));
-  Utility::_exit(ExitCode::SystemError);
+  //Utility::_exit(ExitCode::SystemError);
 }
 
 unsigned Utility::getPort(const char *cPort) {
