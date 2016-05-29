@@ -61,7 +61,7 @@ bool Player::checkUdpSocket(epoll_event &event) {
     } catch (...) {
       return true;
     }
-    std::cerr << "UDP MSG: |" << msg << "|";
+    //std::cerr << "UDP MSG: |" << msg << "|";
     if (Utility::equalExceptWhitespaceOnEnd(msg, PAUSE)) {
       playing = false;
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, PLAY)) {
@@ -69,6 +69,7 @@ bool Player::checkUdpSocket(epoll_event &event) {
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, QUIT)) {
       cleanup(ExitCode::Ok);
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, TITLE)) {
+      title = "SOMETHING, ONLY CHECKING LOL\n";
       udp.Send(title);
     }
     return true;

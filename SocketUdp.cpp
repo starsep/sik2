@@ -48,8 +48,8 @@ SocketUdp::SocketUdp(int d) :
 
 void SocketUdp::Write(const void *data, size_t size) {
   size_t len = sendto(sock, data, size, 0,
-                      reinterpret_cast<sockaddr *>(&my_address),
-                      static_cast<socklen_t>(sizeof(my_address)));
+                      reinterpret_cast<sockaddr *>(&other_address),
+                      static_cast<socklen_t>(sizeof(other_address)));
   if (len != size) {
     Utility::syserr("sendto");
   }
