@@ -39,17 +39,6 @@ void Socket::Connect(const sockaddr *addr, socklen_t addrlen) {
   }
 }
 
-void Socket::Write(const void *buf, size_t count) {
-  size_t err = write(sock, buf, count);
-  if (err != count) {
-    Utility::syserr("partial / failed write");
-  }
-}
-
-void Socket::Write(const std::string &s) {
-  Write(s.c_str(), s.size());
-}
-
 int Socket::get() const {
   return sock;
 }
@@ -69,12 +58,21 @@ void Socket::makeNonBlocking() {
   }
 }
 
-ssize_t Socket::Read(void *buffer, size_t maxCount) {
-  ssize_t count = read(sock, buffer, maxCount);
-  if (count == -1 && errno != EAGAIN) {
-    Utility::syserr("read");
+void Socket::Close() {
+  int err = close(sock);
+  if (err < 0) {
+    Utility::syserr("close");
   }
-  return count;
+}
+
+void Socket::Listen() {
+  if (listen(sock, SOMAXCONN)) {
+    Utility::syserr("listen");
+  }
+}
+
+bool Socket::Bind(const sockaddr *addr, socklen_t addrlen) {
+  return bind(sock, addr, addrlen) == 0;
 }
 
 std::string Socket::receive(int max_len) {
@@ -96,28 +94,10 @@ std::string Socket::receive(int max_len) {
   return result;
 }
 
-std::string Socket::receiveOnce() {
-  static char buffer[BUFFER_LEN];
-  ssize_t count = Read(buffer, BUFFER_LEN);
-  if (count == 0) {
-    throw ClosedConnectionException();
-  }
-  return std::string(buffer, count);
+void Socket::Send(const std::string &s) {
+  Write(s.c_str(), s.size());
 }
 
-void Socket::Close() {
-  int err = close(sock);
-  if (err < 0) {
-    Utility::syserr("close");
-  }
-}
-
-void Socket::Listen() {
-  if (listen(sock, SOMAXCONN)) {
-    Utility::syserr("listen");
-  }
-}
-
-bool Socket::Bind(const sockaddr *addr, socklen_t addrlen) {
-  return bind(sock, addr, addrlen) == 0;
+Socket::~Socket() {
+  Close();
 }

@@ -5,7 +5,13 @@
 
 class SocketUdp : public Socket {
 private:
+  sockaddr_in my_address;
+  sockaddr_in other_address;
 protected:
+  virtual ssize_t Read(void *, size_t);
+
+  virtual void Write(const void *, size_t);
+
 public:
   SocketUdp();
 

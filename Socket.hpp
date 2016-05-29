@@ -18,9 +18,11 @@ protected:
 
   void Socket_(int, int, int);
 
-  void Write(const void *, size_t);
+  void Connect(const sockaddr *, socklen_t);
 
-  ssize_t Read(void *, size_t);
+  virtual ssize_t Read(void *, size_t) = 0;
+
+  virtual void Write(const void *, size_t) = 0;
 
 public:
 
@@ -30,9 +32,7 @@ public:
 
   Socket(const Socket &);
 
-  void Connect(const sockaddr *, socklen_t);
-
-  void Write(const std::string &s);
+  void Send(const std::string &s);
 
   int get() const;
 
@@ -40,11 +40,11 @@ public:
 
   std::string receive(int max_len = -1);
 
-  std::string receiveOnce();
-
   virtual void connectServer(unsigned &port) = 0;
 
   virtual void connectClient(const std::string &host, const unsigned port) = 0;
+
+  ~Socket();
 };
 
 #endif //SIK2_SOCKET_HPP

@@ -14,7 +14,7 @@ void SocketTcp::sendShoutcastHeader(const std::string &path, bool md) {
              "\r\n";                  // whether we want metadata
   request += "Connection: close\r\n"; // connection header
   request += "\r\n";                  // empty line
-  Write(request);
+  Send(request);
 }
 
 void SocketTcp::connectServer(unsigned &port) {
@@ -73,5 +73,28 @@ SocketTcp::SocketTcp() :
 
 SocketTcp::SocketTcp(int d) :
     Socket(d) {
+}
 
+/*std::string SocketTcp::receiveOnce() {
+  static char buffer[BUFFER_LEN];
+  ssize_t count = Read(buffer, BUFFER_LEN);
+  if (count == 0) {
+    throw ClosedConnectionException();
+  }
+  return std::string(buffer, count);
+}*/
+
+void SocketTcp::Write(const void *buf, size_t count) {
+  size_t err = write(sock, buf, count);
+  if (err != count) {
+    Utility::syserr("partial / failed write");
+  }
+}
+
+ssize_t SocketTcp::Read(void *buffer, size_t maxCount) {
+  ssize_t count = read(sock, buffer, maxCount);
+  if (count == -1 && errno != EAGAIN) {
+    Utility::syserr("read");
+  }
+  return count;
 }

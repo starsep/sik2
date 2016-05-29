@@ -6,8 +6,13 @@
 class SocketTcp : public Socket {
 private:
 protected:
+  virtual ssize_t Read(void *, size_t);
+
+  virtual void Write(const void *, size_t);
+
 public:
   SocketTcp();
+
   SocketTcp(int);
 
   SocketTcp Accept(sockaddr *, socklen_t *);

@@ -36,7 +36,7 @@ bool TelnetSession::checkStart(const std::string &command) {
       std::string computer = result[1];
       std::string host = result[2];
       std::string path = result[3];
-      unsigned rPort = static_cast<unsigned>(std::stoi(result[4]));
+      //unsigned rPort = static_cast<unsigned>(std::stoi(result[4]));
       std::string file = result[5];
       unsigned mPort = static_cast<unsigned>(std::stoi(result[6]));
       std::string metadata = result[7];
@@ -49,9 +49,9 @@ bool TelnetSession::checkStart(const std::string &command) {
       for (unsigned i = 2; i <= 7; i++) {
         parameters += result[i] + " ";
       }
-      std::cerr << START << "ing player @ " << computer <<
+      /*std::cerr << START << "ing player @ " << computer <<
       " with parameters: " << host << " " << path << " " << rPort << " " << file << " " << mPort << " " << metadata <<
-      "\n";
+      "\n";*/
       launchPlayer(computer, parameters, mPort);
       return true;
     }
@@ -91,8 +91,8 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::string computer = result[4];
       std::string host = result[5];
       std::string path = result[6];
-      unsigned rPort = static_cast<unsigned>(std::stoi(result[7]));
-      std::string file = result[8];
+      //unsigned rPort = static_cast<unsigned>(std::stoi(result[7]));
+      //std::string file = result[8];
       unsigned mPort = static_cast<unsigned>(std::stoi(result[9]));
       std::string metadata = result[10];
       if (metadata != NO && metadata != YES) {
@@ -104,9 +104,9 @@ bool TelnetSession::checkAt(const std::string &command) {
       for (unsigned i = 5; i <= 10; i++) {
         parameters += result[i] + " ";
       }
-      std::cerr << AT << "ing player @ " << computer <<
+      /*std::cerr << AT << "ing player @ " << computer <<
       " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << parameters <<
-      "\n";
+      "\n";*/
       waitingThreads.push_back(
           new std::thread(&TelnetSession::waitForStart, this, hh * 60 + mm, m, computer, parameters, mPort));
       return true;
@@ -240,7 +240,7 @@ void TelnetSession::checkTelnetEvent(epoll_event &event) {
     //std::cerr << "TELNET EVENT FROM " << event.data.fd << " " << client.get() << " :D\n";
     std::string msg;
     try {
-      msg = client.receiveOnce();
+      msg = client.receive();
     } catch (ClosedConnectionException) {
       running = false;
       return;
@@ -291,7 +291,7 @@ unsigned TelnetSession::launchPlayer(const std::string &computer, const std::str
 
 void TelnetSession::sendClient(const std::string &msg) {
   mutex.lock();
-  client.Write(msg);
+  client.Send(msg);
   mutex.unlock();
 }
 

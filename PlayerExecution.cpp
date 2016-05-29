@@ -74,10 +74,17 @@ PlayerExecution::PlayerExecution(std::string c, std::string p, unsigned m) :
     parameters(p),
     mPort(m),
     udp(),
-    telnet() {
+    telnet(),
+    thread(&PlayerExecution::run, this) {
+}
+
+void PlayerExecution::run() {
   udp.connectClient(computer, mPort);
+  /*if (system("player ant-waw-01.cdn.eurozet.pl / 8602 /tmp/file.mp3 50000 no") != 0) {
+    Utility::syserr("system");
+  }*/
 }
 
 void PlayerExecution::quit() {
-  //TODO
+  udp.Send(QUIT);
 }
