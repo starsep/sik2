@@ -190,6 +190,9 @@ bool TelnetSession::checkQuit(const std::string &command) {
         sendClient(INVALID_QUIT_ID);
         return true;
       }
+      quitPlayerExecution(id);
+      const std::string OK_QUIT = "OK " + std::to_string(id) + "\n";
+      sendClient(OK_QUIT);
       return true;
     }
   }
