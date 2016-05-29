@@ -17,6 +17,7 @@ void SocketUdp::connectServer(unsigned &port) {
 void SocketUdp::connectClient(const std::string &host, const unsigned port) {
   unsigned p = port;
   connectServer(p);
+  host.size(); // TODO: remove
   //TODO?
 }
 
