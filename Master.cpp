@@ -44,7 +44,7 @@ bool Master::checkListeningSocket(epoll_event &event) {
     while (true) {
       sockaddr in_addr;
       socklen_t in_len = sizeof in_addr;
-      Socket client = sock.Accept(&in_addr, &in_len);
+      SocketTcp client = sock.Accept(&in_addr, &in_len);
       if (client.get() == -1) {
         break;
       }

@@ -1,7 +1,7 @@
 #include "TelnetSession.hpp"
 #include <chrono>
 
-TelnetSession::TelnetSession(Socket c) :
+TelnetSession::TelnetSession(SocketTcp &c) :
     client(c.get()),
     running(true),
     mutex(),
@@ -36,9 +36,9 @@ bool TelnetSession::checkStart(const std::string &command) {
       std::string computer = result[1];
       std::string host = result[2];
       std::string path = result[3];
-      int rPort = std::stoi(result[4]);
+      unsigned rPort = static_cast<unsigned>(std::stoi(result[4]));
       std::string file = result[5];
-      int mPort = std::stoi(result[6]);
+      unsigned mPort = static_cast<unsigned>(std::stoi(result[6]));
       std::string metadata = result[7];
       if (metadata != NO && metadata != YES) {
         static const std::string INVALID_START_METADATA = "ERROR metadata option must be " + YES + " or " + NO + "\n";
@@ -46,7 +46,7 @@ bool TelnetSession::checkStart(const std::string &command) {
         return true;
       }
       std::string parameters;
-      for (int i = 2; i <= 7; i++) {
+      for (unsigned i = 2; i <= 7; i++) {
         parameters += result[i] + " ";
       }
       std::cerr << START << "ing player @ " << computer <<
@@ -91,9 +91,9 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::string computer = result[4];
       std::string host = result[5];
       std::string path = result[6];
-      int rPort = std::stoi(result[7]);
+      unsigned rPort = static_cast<unsigned>(std::stoi(result[7]));
       std::string file = result[8];
-      int mPort = std::stoi(result[9]);
+      unsigned mPort = static_cast<unsigned>(std::stoi(result[9]));
       std::string metadata = result[10];
       if (metadata != NO && metadata != YES) {
         static const std::string INVALID_AT_METADATA = "ERROR metadata option must be " + YES + " or " + NO + "\n";
@@ -101,7 +101,7 @@ bool TelnetSession::checkAt(const std::string &command) {
         return true;
       }
       std::string parameters;
-      for (int i = 5; i <= 10; i++) {
+      for (unsigned i = 5; i <= 10; i++) {
         parameters += result[i] + " ";
       }
       std::cerr << AT << "ing player @ " << computer <<
@@ -129,7 +129,7 @@ bool TelnetSession::checkPlay(const std::string &command) {
   try {
     if (boost::regex_match(command, result, playPattern)) {
       std::cerr << PLAY << " " << result[1] << "\n";
-      int id = std::stoi(result[1]);
+      unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_PLAY_ID =
             "ERROR in " + PLAY + " command. Invalid id.\n";
@@ -156,7 +156,7 @@ bool TelnetSession::checkPause(const std::string &command) {
   try {
     if (boost::regex_match(command, result, pausePattern)) {
       std::cerr << PAUSE << " " << result[1] << "\n";
-      int id = std::stoi(result[1]);
+      unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_PAUSE_ID =
             "ERROR in " + PAUSE + " command. Invalid id.\n";
@@ -183,7 +183,7 @@ bool TelnetSession::checkQuit(const std::string &command) {
   try {
     if (boost::regex_match(command, result, quitPattern)) {
       std::cerr << QUIT << " " << result[1] << "\n";
-      int id = std::stoi(result[1]);
+      unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_QUIT_ID =
             "ERROR in " + QUIT + " command. Invalid id.\n";
@@ -213,7 +213,7 @@ bool TelnetSession::checkTitle(const std::string &command) {
   try {
     if (boost::regex_match(command, result, titlePattern)) {
       std::cerr << TITLE << " " << result[1] << "\n";
-      int id = std::stoi(result[1]);
+      unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_TITLE_ID =
             "ERROR in " + TITLE + " command. Invalid id.\n";
@@ -259,7 +259,7 @@ TelnetSession::~TelnetSession() {
   delete telnetThread;
 }
 
-void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p, int mPort) {
+void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p, unsigned mPort) {
   const std::chrono::milliseconds timeToWait(MAX_TIME);
   while (running && Utility::currentMinutes() != begin) {
     std::this_thread::sleep_for(timeToWait);
@@ -267,11 +267,11 @@ void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p,
   if (!running) {
     return;
   }
-  int id = launchPlayer(c, p, mPort);
+  unsigned id = launchPlayer(c, p, mPort);
   waitForEnd((begin + m) % (24 * 60), id);
 }
 
-void TelnetSession::waitForEnd(int end, int id) {
+void TelnetSession::waitForEnd(int end, unsigned id) {
   const std::chrono::milliseconds timeToWait(MAX_TIME);
   while (running && Utility::currentMinutes() != end) {
     std::this_thread::sleep_for(timeToWait);
@@ -279,10 +279,10 @@ void TelnetSession::waitForEnd(int end, int id) {
   quitPlayerExecution(id);
 }
 
-int TelnetSession::launchPlayer(const std::string &computer, const std::string &parameters, int mPort) {
+unsigned TelnetSession::launchPlayer(const std::string &computer, const std::string &parameters, unsigned mPort) {
   mutex.lock();
   playerExecutions.push_back(new PlayerExecution(computer, parameters, mPort));
-  int id = playerExecutions.size() - 1;
+  unsigned id = playerExecutions.size() - 1;
   mutex.unlock();
   std::string msg = "OK " + std::to_string(id) + "\n";
   sendClient(msg);
@@ -295,14 +295,14 @@ void TelnetSession::sendClient(const std::string &msg) {
   mutex.unlock();
 }
 
-bool TelnetSession::checkId(int id) {
+bool TelnetSession::checkId(unsigned id) {
   mutex.lock();
-  bool result = id >= 0 && id < static_cast<int>(playerExecutions.size()) && playerExecutions[id] != nullptr;
+  bool result = id < playerExecutions.size() && playerExecutions[id] != nullptr;
   mutex.unlock();
   return result;
 }
 
-void TelnetSession::quitPlayerExecution(int id) {
+void TelnetSession::quitPlayerExecution(unsigned id) {
   if (checkId(id)) {
     mutex.lock();
     PlayerExecution *toRemove = playerExecutions[id];

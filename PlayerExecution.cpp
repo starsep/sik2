@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
-static std::string sshExec(std::string hostname, std::string command) {
+/*static std::string sshExec(std::string hostname, std::string command) {
 //   std::cout << "--- SSH EXEC --- \n";
 //   std::cout << "HOSTNAME: " << hostname << "\n";
 //   std::cout << "COMMAND: " << command << "\n";
@@ -21,8 +21,7 @@ static std::string sshExec(std::string hostname, std::string command) {
     hostname = hostname.substr(index + 1, hostname.length() - (index + 1));
   }
 
-  Socket connection;
-  connection.connectClient(hostname, port);
+  telnet.connectClient(hostname, port);
 
   LIBSSH2_SESSION *session = libssh2_session_init();
 
@@ -53,12 +52,12 @@ static std::string sshExec(std::string hostname, std::string command) {
     //std::cout << std::string(buffer.begin(), buffer.begin() + size) << "\n";
   }
 
-  /*if (size == 0) {
+  *//*if (size == 0) {
     std::cout << "OK Player finished.\n" + log;
   }
   else {
     std::cout << "ERROR Connection interrupted.\n" + log;
-  }*/
+  }*//*
 
   libssh2_channel_close(channel);
   libssh2_channel_free(channel);
@@ -66,15 +65,17 @@ static std::string sshExec(std::string hostname, std::string command) {
   libssh2_session_free(session);
 
   return log;
-}
+}*/
 
 //std::cerr << sshExec("students.mimuw.edu.pl", "source $HOME/.bash_profile; player ant-waw-01.cdn.eurozet.pl / 8602 file.mp3 50000 no");
 
-PlayerExecution::PlayerExecution(std::string c, std::string p, int m) :
+PlayerExecution::PlayerExecution(std::string c, std::string p, unsigned m) :
     computer(c),
     parameters(p),
-    mPort(m) {
-
+    mPort(m),
+    udp(),
+    telnet() {
+  udp.connectClient(computer, mPort);
 }
 
 void PlayerExecution::quit() {

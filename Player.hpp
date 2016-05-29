@@ -2,6 +2,8 @@
 #define SIK2_PLAYER_HPP
 
 #include "Utility.hpp"
+#include "SocketTcp.hpp"
+#include "SocketUdp.hpp"
 
 class Player {
 private:
@@ -17,8 +19,8 @@ private:
   int metadataCount;
   std::string metaData;
   std::string title;
-  Socket shoutcast;
-  Socket udp;
+  SocketTcp shoutcast;
+  SocketUdp udp;
   bool playing;
 
   void cleanup(ExitCode exitCode);

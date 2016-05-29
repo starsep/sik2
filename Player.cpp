@@ -180,7 +180,7 @@ void Player::run() {
 
   //std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
   shoutcast.connectClient(host, rPort);
-  udp.connectUdp(mPort);
+  udp.connectServer(mPort);
 
   Epoll efd{};
   efd.addEvent(shoutcast);

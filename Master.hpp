@@ -2,7 +2,7 @@
 #define SIK2_MASTER_HPP
 
 #include "Utility.hpp"
-#include "Socket.hpp"
+#include "SocketUdp.hpp"
 #include "TelnetSession.hpp"
 
 #include <thread>
@@ -11,7 +11,7 @@
 class Master {
 private:
   unsigned port;
-  Socket sock;
+  SocketTcp sock;
   std::vector<TelnetSession *> telnetSessions;
 
   void usage(const char **argv);

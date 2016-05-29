@@ -7,7 +7,7 @@
 #include <string>
 
 class Socket {
-private:
+protected:
   int sock;
 
   void Close();
@@ -16,8 +16,13 @@ private:
 
   void Listen();
 
+  void Socket_(int, int, int);
+
+  void Write(const void *, size_t);
+
+  ssize_t Read(void *, size_t);
+
 public:
-  Socket(int, int, int);
 
   Socket(int);
 
@@ -27,11 +32,7 @@ public:
 
   void Connect(const sockaddr *, socklen_t);
 
-  void Write(const void *, size_t);
-
   void Write(const std::string &s);
-
-  ssize_t Read(void *, size_t);
 
   int get() const;
 
@@ -41,17 +42,9 @@ public:
 
   std::string receiveOnce();
 
-  void sendShoutcastHeader(const std::string &, bool);
+  virtual void connectServer(unsigned &port) = 0;
 
-  void connectServer(unsigned &port);
-
-  void connectClient(const std::string &host, const unsigned port);
-
-  void connectUdp(const unsigned port);
-
-  Socket Accept(sockaddr *, socklen_t *);
-
-  const Socket operator=(Socket s);
+  virtual void connectClient(const std::string &host, const unsigned port) = 0;
 };
 
 #endif //SIK2_SOCKET_HPP

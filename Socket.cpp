@@ -21,7 +21,7 @@ Socket::Socket(int _sock) :
     sock(_sock) {
 }
 
-Socket::Socket(int domain, int type, int protocol) {
+void Socket::Socket_(int domain, int type, int protocol) {
   sock = socket(domain, type, protocol);
   if (sock < 0) {
     Utility::syserr("socket");
@@ -105,80 +105,6 @@ std::string Socket::receiveOnce() {
   return std::string(buffer, count);
 }
 
-void Socket::sendShoutcastHeader(const std::string &path, bool md) {
-  std::string request;
-  request += "GET " + path + " HTTP/1.0\r\n"; // http header
-  request += "Accept: */*\r\n";               // accept header
-  request += std::string("Icy-MetaData: ") + (md ? "1" : "0") +
-             "\r\n";                  // whether we want metadata
-  request += "Connection: close\r\n"; // connection header
-  request += "\r\n";                  // empty line
-  Write(request);
-}
-
-void Socket::connectServer(unsigned &port) {
-  addrinfo hints;
-  addrinfo *addr_result;
-
-  Utility::_getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &addr_result, true);
-
-  addrinfo *rp;
-  for (rp = addr_result; rp != nullptr; rp = rp->ai_next) {
-    sock = Socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol).get();
-
-    if (Bind(rp->ai_addr, rp->ai_addrlen)) {
-      break;
-    }
-
-    Close();
-  }
-
-  if (rp == nullptr) {
-    Utility::syserr("Could not bind\n");
-  }
-
-  freeaddrinfo(addr_result);
-
-  makeNonBlocking();
-  Listen();
-
-  if (port == 0) {
-    sockaddr_in serv_addr;
-    socklen_t len = sizeof(serv_addr);
-    if (getsockname(get(), reinterpret_cast<sockaddr *>(&serv_addr), &len) == -1) {
-      Utility::syserr("getsockname");
-    }
-    port = ntohs(serv_addr.sin_port);
-  }
-}
-
-void Socket::connectClient(const std::string &host, const unsigned port) {
-  addrinfo hints;
-  addrinfo *addr_result;
-
-  Utility::_getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &addr_result);
-
-  *this = Socket(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
-
-  Connect(addr_result->ai_addr, addr_result->ai_addrlen);
-  freeaddrinfo(addr_result);
-  makeNonBlocking();
-}
-
-void Socket::connectUdp(const unsigned port) {
-  *this = Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-  sockaddr_in si_me;
-  memset(&si_me, 0, sizeof(si_me));
-
-  si_me.sin_family = AF_INET;
-  si_me.sin_port = htons(port);
-  si_me.sin_addr.s_addr = htonl(INADDR_ANY);
-
-  Bind(reinterpret_cast<sockaddr *>(&si_me), sizeof(si_me));
-
-}
-
 void Socket::Close() {
   int err = close(sock);
   if (err < 0) {
@@ -194,15 +120,4 @@ void Socket::Listen() {
 
 bool Socket::Bind(const sockaddr *addr, socklen_t addrlen) {
   return bind(sock, addr, addrlen) == 0;
-}
-
-Socket Socket::Accept(sockaddr *addr, socklen_t *addrlen) {
-  Socket result{};
-  result.sock = accept(sock, addr, addrlen);
-  return result;
-}
-
-const Socket Socket::operator=(Socket s) {
-  sock = s.sock;
-  return *this;
 }

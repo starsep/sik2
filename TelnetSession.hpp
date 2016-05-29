@@ -1,7 +1,7 @@
 #ifndef SIK2_TELNETSESSION_HPP
 #define SIK2_TELNETSESSION_HPP
 
-#include "Socket.hpp"
+#include "SocketTcp.hpp"
 #include "Epoll.hpp"
 #include "Utility.hpp"
 #include "PlayerExecution.hpp"
@@ -11,7 +11,7 @@
 
 class TelnetSession {
 private:
-  Socket client;
+  SocketTcp client;
   bool running;
   std::mutex mutex;
   std::thread *telnetThread;
@@ -36,20 +36,20 @@ private:
 
   bool checkTitle(const std::string &);
 
-  void waitForStart(int begin, int m, std::string c, std::string p, int mPort);
+  void waitForStart(int begin, int m, std::string c, std::string p, unsigned mPort);
 
-  void waitForEnd(int end, int id);
+  void waitForEnd(int end, unsigned id);
 
-  int launchPlayer(const std::string &computer, const std::string &parameters, int mPort);
+  unsigned launchPlayer(const std::string &computer, const std::string &parameters, unsigned mPort);
 
   void sendClient(const std::string &msg);
 
-  bool checkId(int id);
+  bool checkId(unsigned id);
 
-  void quitPlayerExecution(int id);
+  void quitPlayerExecution(unsigned id);
 
 public:
-  TelnetSession(Socket c);
+  TelnetSession(SocketTcp &c);
 
   TelnetSession(const TelnetSession &) = delete;
 
