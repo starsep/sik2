@@ -69,3 +69,10 @@ static std::string sshExec(std::string hostname, std::string command) {
 }
 
 //std::cerr << sshExec("students.mimuw.edu.pl", "source $HOME/.bash_profile; player ant-waw-01.cdn.eurozet.pl / 8602 file.mp3 50000 no");
+
+PlayerExecution::PlayerExecution(std::string c, std::string p, int m) :
+    computer(c),
+    parameters(p),
+    mPort(m) {
+
+}
