@@ -47,6 +47,8 @@ public:
 
   std::string receive(int max_len = -1);
 
+  std::string receiveOnce();
+
   virtual void connectServer(unsigned &port) = 0;
 
   virtual void connectClient(const std::string &host, const unsigned port) = 0;

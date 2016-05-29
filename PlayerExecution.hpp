@@ -11,6 +11,7 @@
 class PlayerExecution {
 private:
   bool valid;
+  bool running;
   std::string computer;
   std::string parameters;
   unsigned mPort;
@@ -18,6 +19,11 @@ private:
   SocketTcp telnet;
   int id;
   std::mutex &mutex;
+
+  bool checkUdpEvent(epoll_event &e);
+
+  void sshExec(std::string hostname, const std::string command);
+
 public:
   std::thread thread;
 

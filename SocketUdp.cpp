@@ -35,14 +35,16 @@ void SocketUdp::connectClient(const std::string &host, const unsigned port) {
     return;
   }
 
-  my_address.sin_family = AF_INET; // IPv4
-  my_address.sin_addr.s_addr =
+  other_address.sin_family = AF_INET; // IPv4
+  other_address.sin_addr.s_addr =
       reinterpret_cast<sockaddr_in *>(addr_result->ai_addr)->sin_addr.s_addr; // address IP
-  my_address.sin_port = htons(port);
+  other_address.sin_port = htons(port);
 
   freeaddrinfo(addr_result);
 
   Socket_(PF_INET, SOCK_DGRAM, 0);
+
+  makeNonBlocking();
 }
 
 SocketUdp::SocketUdp() :

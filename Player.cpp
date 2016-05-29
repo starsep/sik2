@@ -141,7 +141,7 @@ bool Player::checkUdpSocket(epoll_event &event) {
     } catch (...) {
       return true;
     }
-    // std::cerr << "UDP MSG: |" << msg << "|";
+    //std::cerr << "UDP MSG: |" << msg << "|";
     if (Utility::equalExceptWhitespaceOnEnd(msg, PAUSE)) {
       playing = false;
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, PLAY)) {

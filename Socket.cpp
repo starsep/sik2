@@ -153,3 +153,12 @@ Socket::~Socket() {
     Close();
   }*/
 }
+
+std::string Socket::receiveOnce() {
+  static char buffer[BUFFER_LEN];
+  ssize_t count = Read(buffer, BUFFER_LEN);
+  if (count == 0) {
+    throw ClosedConnectionException();
+  }
+  return std::string(buffer, count);
+}

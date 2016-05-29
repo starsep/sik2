@@ -129,7 +129,7 @@ bool TelnetSession::checkPlay(const std::string &command) {
   const static boost::regex playPattern(PLAY + R"(\s+(\d+)\s*)");
   try {
     if (boost::regex_match(command, result, playPattern)) {
-      std::cerr << PLAY << " " << result[1] << "\n";
+      //std::cerr << PLAY << " " << result[1] << "\n";
       unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_PLAY_ID =

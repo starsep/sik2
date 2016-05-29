@@ -94,15 +94,6 @@ SocketTcp::SocketTcp(int d) :
     Socket(d) {
 }
 
-/*std::string SocketTcp::receiveOnce() {
-  static char buffer[BUFFER_LEN];
-  ssize_t count = Read(buffer, BUFFER_LEN);
-  if (count == 0) {
-    throw ClosedConnectionException();
-  }
-  return std::string(buffer, count);
-}*/
-
 void SocketTcp::Write(const void *buf, size_t count) {
   if (!checkValid("SocketTcp::Write")) {
     return;
