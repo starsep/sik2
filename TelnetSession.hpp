@@ -1,9 +1,10 @@
-#ifndef SIK2_TELNETSESSION_H
-#define SIK2_TELNETSESSION_H
+#ifndef SIK2_TELNETSESSION_HPP
+#define SIK2_TELNETSESSION_HPP
 
 #include "Socket.hpp"
 #include "Epoll.hpp"
 #include "Utility.hpp"
+#include "PlayerExecution.hpp"
 
 #include <thread>
 
@@ -12,6 +13,7 @@ private:
   Socket client;
   bool running;
   std::thread *thread;
+  std::vector<PlayerExecution *> playerExecutions;
 
   void run();
 
@@ -40,4 +42,4 @@ public:
 };
 
 
-#endif //SIK2_TELNETSESSION_H
+#endif //SIK2_TELNETSESSION_HPP

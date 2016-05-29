@@ -1,5 +1,5 @@
-#ifndef SIK2_SOCKET_H
-#define SIK2_SOCKET_H
+#ifndef SIK2_SOCKET_HPP
+#define SIK2_SOCKET_HPP
 
 #include "Utility.hpp"
 
@@ -54,4 +54,4 @@ public:
   const Socket operator=(Socket s);
 };
 
-#endif //SIK2_SOCKET_H
+#endif //SIK2_SOCKET_HPP

@@ -1,5 +1,5 @@
-#ifndef SIK2_UTILITY_H
-#define SIK2_UTILITY_H
+#ifndef SIK2_UTILITY_HPP
+#define SIK2_UTILITY_HPP
 
 #include <boost/regex.hpp>
 #include <cctype>
@@ -91,4 +91,4 @@ public:
   static bool startsWith(const std::string &s, const std::string &pref);
 };
 
-#endif // SIK2_UTILITY_H
+#endif // SIK2_UTILITY_HPP

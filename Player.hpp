@@ -1,5 +1,5 @@
-#ifndef SIK2_PLAYER_H
-#define SIK2_PLAYER_H
+#ifndef SIK2_PLAYER_HPP
+#define SIK2_PLAYER_HPP
 
 #include "Utility.hpp"
 
@@ -49,4 +49,4 @@ public:
   void run();
 };
 
-#endif // SIK2_PLAYER_H
+#endif // SIK2_PLAYER_HPP

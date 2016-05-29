@@ -1,5 +1,5 @@
-#ifndef SIK2_MASTER_H
-#define SIK2_MASTER_H
+#ifndef SIK2_MASTER_HPP
+#define SIK2_MASTER_HPP
 
 #include "Utility.hpp"
 #include "Socket.hpp"
@@ -32,4 +32,4 @@ public:
   ~Master();
 };
 
-#endif // SIK2_MASTER_H
+#endif // SIK2_MASTER_HPP

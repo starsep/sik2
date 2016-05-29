@@ -3,12 +3,14 @@
 TelnetSession::TelnetSession(Socket c) :
     client(c.get()),
     running(true),
-    thread(new std::thread(&TelnetSession::run, this)) {
+    thread(new std::thread(&TelnetSession::run, this)),
+    playerExecutions() {
 }
 
 TelnetSession::TelnetSession(const TelnetSession &t) {
   client = Socket(t.client.get());
   thread = t.thread;
+  playerExecutions = t.playerExecutions;
 }
 
 void TelnetSession::run() {

@@ -1,5 +1,5 @@
-#ifndef SIK2_EPOLL_H
-#define SIK2_EPOLL_H
+#ifndef SIK2_EPOLL_HPP
+#define SIK2_EPOLL_HPP
 
 #include <sys/epoll.h>
 #include <vector>
@@ -17,4 +17,4 @@ public:
   Epoll();
 };
 
-#endif //SIK2_EPOLL_H
+#endif //SIK2_EPOLL_HPP
