@@ -46,6 +46,8 @@ private:
 
   bool checkId(int id);
 
+  void quitPlayerExecution(int id);
+
 public:
   TelnetSession(Socket c);
 

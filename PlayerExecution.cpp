@@ -76,3 +76,7 @@ PlayerExecution::PlayerExecution(std::string c, std::string p, int m) :
     mPort(m) {
 
 }
+
+void PlayerExecution::quit() {
+  //TODO
+}

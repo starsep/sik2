@@ -10,6 +10,7 @@ private:
   int mPort;
 public:
   PlayerExecution(std::string c, std::string p, int m);
+  void quit();
 };
 
 #endif //SIK2_PLAYEREXECUTION_HPP

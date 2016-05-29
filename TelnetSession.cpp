@@ -269,7 +269,11 @@ void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p,
 }
 
 void TelnetSession::waitForEnd(int end, int id) {
-
+  const std::chrono::milliseconds timeToWait(MAX_TIME);
+  while (running && Utility::currentMinutes() != end) {
+    std::this_thread::sleep_for(timeToWait);
+  }
+  quitPlayerExecution(id);
 }
 
 int TelnetSession::launchPlayer(const std::string &computer, const std::string &parameters, int mPort) {
@@ -293,4 +297,15 @@ bool TelnetSession::checkId(int id) {
   bool result = id >= 0 && id < static_cast<int>(playerExecutions.size()) && playerExecutions[id] != nullptr;
   mutex.unlock();
   return result;
+}
+
+void TelnetSession::quitPlayerExecution(int id) {
+  if (checkId(id)) {
+    mutex.lock();
+    PlayerExecution *toRemove = playerExecutions[id];
+    playerExecutions[id] = nullptr;
+    mutex.unlock();
+    toRemove->quit();
+    delete toRemove;
+  }
 }
