@@ -11,15 +11,17 @@
 class TelnetSession {
 private:
   struct TimedEvent {
+  private:
+    int minutes() const {
+      return 60 * hh + mm;
+    }
+  public:
     int hh;
     int mm;
     int m;
     std::string computer;
     std::string parameters;
-
-    int minutes() const {
-      return 60 * hh + mm;
-    }
+    int mPort;
 
     bool operator<(const TimedEvent &b) const {
       return minutes() < b.minutes();

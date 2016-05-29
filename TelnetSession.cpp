@@ -103,7 +103,7 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::cerr << AT << "ing player @ " << computer <<
       " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << parameters <<
       "\n";
-      timedEvents.push_back({hh, mm, m, computer, parameters});
+      timedEvents.push_back({hh, mm, m, computer, parameters, mPort});
       std::sort(timedEvents.begin(), timedEvents.end());
       return true;
     }
