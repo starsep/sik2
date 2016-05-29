@@ -45,6 +45,8 @@ private:
 
   void handleHeader(const std::string &header);
 
+  bool isHeaderLine(const std::string &line);
+
 public:
   Player(int argc, const char **argv);
 

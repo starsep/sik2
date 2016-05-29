@@ -1,5 +1,5 @@
-#include "Utility.hpp"
 #include "Player.hpp"
+#include "Utility.hpp"
 
 void Player::cleanup(ExitCode exitCode) { Utility::_exit(exitCode); }
 
@@ -26,14 +26,17 @@ void Player::getArguments(int argc, const char **argv) {
 }
 
 void Player::usage(const char **argv) {
-  std::cerr << "Usage: " << argv[0] << " host path r-port file m-port md" << std::endl;
+  std::cerr << "Usage: " << argv[0] << " host path r-port file m-port md"
+            << std::endl;
   cleanup(ExitCode::InvalidArguments);
 }
 
 bool Player::checkShoutcastSocket(epoll_event &event) {
   if (event.data.fd == shoutcast.get()) {
     try {
-      std::string data = shoutcast.receive(stillHeader ? MAX_HEADER_SHOUTCAST_SIZE : INF);
+      std::string data =
+          shoutcast.receive(stillHeader ? MAX_HEADER_SHOUTCAST_SIZE : INF);
+      // std::cerr << data.size() << "\n";
       if (stillHeader) {
         handleHeader(data);
       } else {
@@ -45,57 +48,13 @@ bool Player::checkShoutcastSocket(epoll_event &event) {
     } catch (ClosedConnectionException) {
       cleanup(ExitCode::Ok);
     } catch (TooMuchDataException) {
-      std::cerr << "Received too much data from shoutcast server. Exiting." << std::endl;
+      std::cerr << "Received too much data from shoutcast server. Exiting."
+                << std::endl;
       cleanup(ExitCode::BadData);
     }
     return true;
   }
   return false;
-}
-
-bool Player::checkUdpSocket(epoll_event &event) {
-  if (event.data.fd == udp.get()) {
-    std::string msg;
-    try {
-      msg = udp.receive();
-    } catch (...) {
-      return true;
-    }
-    //std::cerr << "UDP MSG: |" << msg << "|";
-    if (Utility::equalExceptWhitespaceOnEnd(msg, PAUSE)) {
-      playing = false;
-    } else if (Utility::equalExceptWhitespaceOnEnd(msg, PLAY)) {
-      playing = true;
-    } else if (Utility::equalExceptWhitespaceOnEnd(msg, QUIT)) {
-      cleanup(ExitCode::Ok);
-    } else if (Utility::equalExceptWhitespaceOnEnd(msg, TITLE)) {
-      title = "SOMETHING, ONLY CHECKING LOL\n";
-      udp.Send(title);
-    }
-    return true;
-  }
-  return false;
-}
-
-void Player::handleMetadata() {
-  boost::smatch result;
-  const static boost::regex streamTitlePattern(R"(StreamTitle='(.*?)';)");
-  try {
-    if (boost::regex_search(metaData, result, streamTitlePattern)) {
-      title = result[1];
-    }
-  }
-  catch (...) {
-  }
-  metaData = "";
-}
-
-
-void Player::printData(const std::string &data) {
-  if (playing) {
-    std::cout << data;
-    std::cout.flush();
-  }
 }
 
 void Player::subtractMetadata(std::string &data) {
@@ -138,43 +97,107 @@ void Player::handleData(std::string &data) {
 }
 
 void Player::handleHeaderLine(const std::string &line) {
-  //std::cerr << line << std::endl;
-  boost::smatch result;
-  const static boost::regex metaIntPattern(R"(icy-metaint:\s*(\d+)\s*)");
+  boost::smatch what;
+  const static boost::regex metaIntPattern(R"(icy-metaint:\s*(\d+).*)");
   try {
-    if (boost::regex_match(line, result, metaIntPattern)) {
-      metaInt = std::stoi(result[1]);
+    if (boost::regex_match(line, what, metaIntPattern)) {
+      metaInt = std::stoi(what[1]);
     }
+  } catch (...) {
   }
-  catch (...) {
+  const static boost::regex icyResponse(R"(ICY\s+(\d+)\s+OK\s*)");
+  try {
+    if (boost::regex_match(line, what, icyResponse)) {
+      int status = std::stoi(what[1]);
+      if (status != 200) {
+        cleanup(ExitCode::BadData);
+      }
+    }
+  } catch (...) {
   }
 }
 
 void Player::handleHeader(const std::string &header) {
+  // std::cerr << "HEADER\n";
   std::stringstream sstream(header);
   std::string line;
   while (!sstream.eof()) {
     std::getline(sstream, line);
-    if (line.empty() || line == "\r") {
+    if (!isHeaderLine(line)) {
+      // std::cerr << "NOT HEADER LINE: " << line << "\n";
       std::getline(sstream, line, char(EOF));
       return handleData(line);
     }
+    // std::cerr << "HEADER LINE: " << line << "\n";
     handleHeaderLine(line);
   }
 }
 
-Player::Player(int argc, const char **argv) :
-    stillHeader(true),
-    metaInt(0),
-    byteCounter(0),
-    metadataCount(0),
-    title(),
-    shoutcast(),
-    udp(),
-    playing(true) {
-  getArguments(argc, argv);
+bool Player::checkUdpSocket(epoll_event &event) {
+  if (event.data.fd == udp.get()) {
+    std::string msg;
+    try {
+      msg = udp.receive();
+    } catch (...) {
+      return true;
+    }
+    // std::cerr << "UDP MSG: |" << msg << "|";
+    if (Utility::equalExceptWhitespaceOnEnd(msg, PAUSE)) {
+      playing = false;
+    } else if (Utility::equalExceptWhitespaceOnEnd(msg, PLAY)) {
+      playing = true;
+    } else if (Utility::equalExceptWhitespaceOnEnd(msg, QUIT)) {
+      cleanup(ExitCode::Ok);
+    } else if (Utility::equalExceptWhitespaceOnEnd(msg, TITLE)) {
+      // title = "SOMETHING, ONLY CHECKING LOL\n";
+      udp.Send(title);
+    }
+    return true;
+  }
+  return false;
 }
 
+void Player::handleMetadata() {
+  boost::smatch result;
+  const static boost::regex streamTitlePattern(R"(StreamTitle='(.*?)';)");
+  try {
+    if (boost::regex_search(metaData, result, streamTitlePattern)) {
+      title = result[1];
+      // std::cerr << title << "\n";
+    }
+  } catch (...) {
+  }
+  metaData = "";
+}
+
+void Player::printData(const std::string &data) {
+  if (playing) {
+    std::cout << data;
+    std::cout.flush();
+  }
+}
+
+bool Player::isHeaderLine(const std::string &line) {
+  return !(line.empty() || line == "\r");
+  /*if (line.empty() || line == "\r") {
+    return true;
+  }
+  if (Utility::startsWith(line, "icy") || Utility::startsWith(line, "ICY")) {
+    return true;
+  }
+  if (Utility::startsWith(line, "content") || Utility::startsWith(line,
+  "X-Clacks") ||
+      Utility::startsWith(line, "HTTP")) {
+    return true;
+  }
+  return false;*/
+}
+
+Player::Player(int argc, const char **argv)
+    : stillHeader(true), metaInt(0), byteCounter(0), metadataCount(0), title(),
+      shoutcast(), udp(), playing(true) {
+  getArguments(argc, argv);
+}
 
 void Player::run() {
   if (filename == stdOut) {
@@ -183,7 +206,8 @@ void Player::run() {
   std::ofstream ofstream(filename, std::ios_base::binary | std::ios_base::out);
   std::cout.rdbuf(ofstream.rdbuf());
 
-  //std::cerr << "Connecting with: " << host << " on port: " << rPort << std::endl;
+  // std::cerr << "Connecting with: " << host << " on port: " << rPort <<
+  // std::endl;
   shoutcast.connectClient(host, rPort);
   udp.connectServer(mPort);
 
@@ -196,9 +220,10 @@ void Player::run() {
   std::cerr.flush();
 
   while (true) {
-    std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
+    std::vector<epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME_MS);
     if (events.empty()) {
-      std::cerr << "Max time waiting for server exceeded (" << MAX_TIME << " seconds). Exiting." << std::endl;
+      std::cerr << "Max time waiting for server exceeded (" << MAX_TIME_S
+                << " seconds). Exiting." << std::endl;
       cleanup(ExitCode::SystemError);
     }
     for (epoll_event &event : events) {

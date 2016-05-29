@@ -10,8 +10,9 @@ void SocketTcp::sendShoutcastHeader(const std::string &path, bool md) {
   std::string request;
   request += "GET " + path + " HTTP/1.0\r\n"; // http header
   request += "Accept: */*\r\n";               // accept header
-  request += std::string("Icy-MetaData: ") + (md ? "1" : "0") +
-             "\r\n";                  // whether we want metadata
+  if (md) {
+    request += "Icy-MetaData: 1\r\n"; // whether we want metadata
+  }
   request += "Connection: close\r\n"; // connection header
   request += "\r\n";                  // empty line
   Send(request);
@@ -61,6 +62,8 @@ void SocketTcp::connectClient(const std::string &host, const unsigned port) {
 
   Socket_(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
 
+  setMaxTimeout(MAX_TIME_S);
+
   Connect(addr_result->ai_addr, addr_result->ai_addrlen);
   freeaddrinfo(addr_result);
   makeNonBlocking();
@@ -97,4 +100,20 @@ ssize_t SocketTcp::Read(void *buffer, size_t maxCount) {
     Utility::syserr("read");
   }
   return count;
+}
+
+void SocketTcp::setMaxTimeout(int seconds) {
+  struct timeval timeout;
+  timeout.tv_sec = seconds;
+  timeout.tv_usec = 0;
+
+  if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                 sizeof(timeout)) < 0) {
+    Utility::syserr("setsockopt failed\n");
+  }
+
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                 sizeof(timeout)) < 0) {
+    Utility::syserr("setsockopt failed\n");
+  }
 }

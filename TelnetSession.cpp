@@ -260,7 +260,7 @@ TelnetSession::~TelnetSession() {
 }
 
 void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p, unsigned mPort) {
-  const std::chrono::milliseconds timeToWait(MAX_TIME);
+  const std::chrono::milliseconds timeToWait(MAX_TIME_MS);
   while (running && Utility::currentMinutes() != begin) {
     std::this_thread::sleep_for(timeToWait);
   }
@@ -272,7 +272,7 @@ void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p,
 }
 
 void TelnetSession::waitForEnd(int end, unsigned id) {
-  const std::chrono::milliseconds timeToWait(MAX_TIME);
+  const std::chrono::milliseconds timeToWait(MAX_TIME_MS);
   while (running && Utility::currentMinutes() != end) {
     std::this_thread::sleep_for(timeToWait);
   }

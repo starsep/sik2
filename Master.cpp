@@ -66,7 +66,7 @@ void Master::run() {
   Epoll efd{};
   efd.addEvent(sock);
   while (true) {
-    std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME);
+    std::vector <epoll_event> events = efd.wait(MAX_SOCKETS_PLAYER, MAX_TIME_MS);
     for (epoll_event &event : events) {
       checkListeningSocket(event);
     }
