@@ -25,7 +25,6 @@ Socket::Socket(int _sock) :
 
 void Socket::makeInvalid(std::string s) {
   valid = false;
-  std::cerr << "Socket::makeInvalid: " << s << '\n';
   Utility::info(s.c_str());
 }
 
@@ -148,11 +147,6 @@ void Socket::Send(const std::string &s) {
   Write(s.c_str(), s.size());
 }
 
-Socket::~Socket() {
-  /*if (get() != -1) {
-    Close();
-  }*/
-}
 
 std::string Socket::receiveOnce() {
   static char buffer[BUFFER_LEN];

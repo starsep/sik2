@@ -37,7 +37,6 @@ bool TelnetSession::checkStart(const std::string &command) {
       std::string computer = result[1];
       std::string host = result[2];
       std::string path = result[3];
-      //unsigned rPort = static_cast<unsigned>(std::stoi(result[4]));
       std::string file = result[5];
       unsigned mPort = static_cast<unsigned>(std::stoi(result[6]));
       std::string metadata = result[7];
@@ -50,9 +49,6 @@ bool TelnetSession::checkStart(const std::string &command) {
       for (unsigned i = 2; i <= 7; i++) {
         parameters += result[i] + " ";
       }
-      /*std::cerr << START << "ing player @ " << computer <<
-      " with parameters: " << host << " " << path << " " << rPort << " " << file << " " << mPort << " " << metadata <<
-      "\n";*/
       launchPlayer(computer, parameters, mPort);
       return true;
     }
@@ -92,8 +88,6 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::string computer = result[4];
       std::string host = result[5];
       std::string path = result[6];
-      //unsigned rPort = static_cast<unsigned>(std::stoi(result[7]));
-      //std::string file = result[8];
       unsigned mPort = static_cast<unsigned>(std::stoi(result[9]));
       std::string metadata = result[10];
       if (metadata != NO && metadata != YES) {
@@ -105,9 +99,6 @@ bool TelnetSession::checkAt(const std::string &command) {
       for (unsigned i = 5; i <= 10; i++) {
         parameters += result[i] + " ";
       }
-      /*std::cerr << AT << "ing player @ " << computer <<
-      " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << parameters <<
-      "\n";*/
       waitingThreads.push_back(
           new std::thread(&TelnetSession::waitForStart, this, hh * 60 + mm, m, computer, parameters, mPort));
       return true;
@@ -129,7 +120,6 @@ bool TelnetSession::checkPlay(const std::string &command) {
   const static boost::regex playPattern(PLAY + R"(\s+(\d+)\s*)");
   try {
     if (boost::regex_match(command, result, playPattern)) {
-      //std::cerr << PLAY << " " << result[1] << "\n";
       unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_PLAY_ID =
@@ -159,7 +149,6 @@ bool TelnetSession::checkPause(const std::string &command) {
   const static boost::regex pausePattern(PAUSE + R"(\s+(\d+)\s*)");
   try {
     if (boost::regex_match(command, result, pausePattern)) {
-      std::cerr << PAUSE << " " << result[1] << "\n";
       unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_PAUSE_ID =
@@ -189,7 +178,6 @@ bool TelnetSession::checkQuit(const std::string &command) {
   const static boost::regex quitPattern(QUIT + R"(\s+(\d+)\s*)");
   try {
     if (boost::regex_match(command, result, quitPattern)) {
-      std::cerr << QUIT << " " << result[1] << "\n";
       unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_QUIT_ID =
@@ -219,7 +207,6 @@ bool TelnetSession::checkTitle(const std::string &command) {
   const static boost::regex titlePattern(TITLE + R"(\s+(\d+)\s*)");
   try {
     if (boost::regex_match(command, result, titlePattern)) {
-      std::cerr << TITLE << " " << result[1] << "\n";
       unsigned id = std::stoi(result[1]);
       if (!checkId(id)) {
         static const std::string INVALID_TITLE_ID =
@@ -245,7 +232,6 @@ bool TelnetSession::checkCommand(const std::string &c) {
 
 bool TelnetSession::checkTelnetEvent(epoll_event &event) {
   if (event.data.fd == client.get()) {
-    //std::cerr << "TELNET EVENT FROM " << event.data.fd << " " << client.get() << " :D\n";
     std::string msg;
     try {
       msg = client.receive();

@@ -36,7 +36,6 @@ bool Player::checkShoutcastSocket(epoll_event &event) {
     try {
       std::string data =
           shoutcast.receive(stillHeader ? MAX_HEADER_SHOUTCAST_SIZE : INF);
-      // std::cerr << data.size() << "\n";
       if (stillHeader) {
         handleHeader(data);
       } else {
@@ -118,17 +117,14 @@ void Player::handleHeaderLine(const std::string &line) {
 }
 
 void Player::handleHeader(const std::string &header) {
-  // std::cerr << "HEADER\n";
   std::stringstream sstream(header);
   std::string line;
   while (!sstream.eof()) {
     std::getline(sstream, line);
     if (!isHeaderLine(line)) {
-      // std::cerr << "NOT HEADER LINE: " << line << "\n";
       std::getline(sstream, line, char(EOF));
       return handleData(line);
     }
-    // std::cerr << "HEADER LINE: " << line << "\n";
     handleHeaderLine(line);
   }
 }
@@ -141,7 +137,6 @@ bool Player::checkUdpSocket(epoll_event &event) {
     } catch (...) {
       return true;
     }
-    //std::cerr << "UDP MSG: |" << msg << "|";
     if (Utility::equalExceptWhitespaceOnEnd(msg, PAUSE)) {
       playing = false;
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, PLAY)) {
@@ -149,7 +144,6 @@ bool Player::checkUdpSocket(epoll_event &event) {
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, QUIT)) {
       cleanup(ExitCode::Ok);
     } else if (Utility::equalExceptWhitespaceOnEnd(msg, TITLE)) {
-      // title = "SOMETHING, ONLY CHECKING LOL\n";
       udp.Send(title);
     }
     return true;
@@ -163,7 +157,6 @@ void Player::handleMetadata() {
   try {
     if (boost::regex_search(metaData, result, streamTitlePattern)) {
       title = result[1];
-      // std::cerr << title << "\n";
     }
   } catch (...) {
   }
@@ -179,18 +172,6 @@ void Player::printData(const std::string &data) {
 
 bool Player::isHeaderLine(const std::string &line) {
   return !(line.empty() || line == "\r");
-  /*if (line.empty() || line == "\r") {
-    return true;
-  }
-  if (Utility::startsWith(line, "icy") || Utility::startsWith(line, "ICY")) {
-    return true;
-  }
-  if (Utility::startsWith(line, "content") || Utility::startsWith(line,
-  "X-Clacks") ||
-      Utility::startsWith(line, "HTTP")) {
-    return true;
-  }
-  return false;*/
 }
 
 Player::Player(int argc, const char **argv)
@@ -206,8 +187,6 @@ void Player::run() {
   std::ofstream ofstream(filename, std::ios_base::binary | std::ios_base::out);
   std::cout.rdbuf(ofstream.rdbuf());
 
-  // std::cerr << "Connecting with: " << host << " on port: " << rPort <<
-  // std::endl;
   shoutcast.connectClient(host, rPort);
   udp.connectServer(mPort);
 

@@ -6,7 +6,6 @@
 #include <pwd.h>
 
 void PlayerExecution::sshExec(std::string hostname, const std::string command) {
-  //std::cerr << command << "\n";
   const int ssh_port = 22;
 
   passwd *user = getpwuid(getuid());
@@ -43,7 +42,6 @@ void PlayerExecution::sshExec(std::string hostname, const std::string command) {
     valid = false;
     Utility::info("libssh2_userauth_publickey_fromfile");
     ptr[length] = '\0';
-    //std::cerr << username << " " << hostname << "\n";
     Utility::info(ptr);
     free(ptr);
   }
@@ -61,8 +59,6 @@ void PlayerExecution::sshExec(std::string hostname, const std::string command) {
   libssh2_channel_free(channel);
   libssh2_session_disconnect(session, "");
   libssh2_session_free(session);
-
-  //std::cerr << "EXECUTED\n";
 }
 
 PlayerExecution::PlayerExecution(std::string c, std::string p, unsigned m, std::mutex &mut, SocketTcp &s, int i) :
@@ -110,7 +106,6 @@ void PlayerExecution::run() {
 
   while (running) {
     std::vector <epoll_event> events = efd.wait(MAX_EVENTS_TELNET, MAX_TIME_MS);
-    //std::cerr << "EVENTS?\n";
     for (epoll_event &event : events) {
       if (!checkUdpEvent(event)) {
       }

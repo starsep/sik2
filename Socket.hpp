@@ -52,8 +52,6 @@ public:
   virtual void connectServer(unsigned &port) = 0;
 
   virtual void connectClient(const std::string &host, const unsigned port) = 0;
-
-  ~Socket();
 };
 
 #endif //SIK2_SOCKET_HPP
