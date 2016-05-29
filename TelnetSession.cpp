@@ -18,7 +18,7 @@ void TelnetSession::run() {
     std::vector <epoll_event> events = efd.wait(MAX_EVENTS_TELNET, INF);
     for (epoll_event &event : events) {
       if (!checkTelnetEvent(event)) {
-        return;
+        //TODO:
       }
     }
   }
