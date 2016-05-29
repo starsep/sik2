@@ -6,19 +6,30 @@
 
 #include <string>
 #include <thread>
+#include <mutex>
 
 class PlayerExecution {
 private:
+  bool valid;
   std::string computer;
   std::string parameters;
   unsigned mPort;
   SocketUdp udp;
   SocketTcp telnet;
-  std::thread thread;
+  int id;
+  std::mutex &mutex;
 public:
-  PlayerExecution(std::string c, std::string p, unsigned m);
+  std::thread thread;
+
+  PlayerExecution(std::string c, std::string p, unsigned m, std::mutex &mut, SocketTcp &s, int i);
+
   void quit();
+
   void run();
+
+  bool isValid();
+
+  void sendCommand(const std::string &s);
 };
 
 #endif //SIK2_PLAYEREXECUTION_HPP

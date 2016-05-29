@@ -9,6 +9,12 @@ class Socket;
 class Epoll {
 private:
   int efd;
+  bool valid;
+
+  bool checkValid();
+
+  void makeInvalid();
+
 public:
   void addEvent(const Socket &socket);
 

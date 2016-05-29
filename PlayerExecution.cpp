@@ -26,7 +26,7 @@
   LIBSSH2_SESSION *session = libssh2_session_init();
 
   if (libssh2_session_handshake(session, connection.get()) != 0) {
-    Utility::syserr("libssh2_session_handshake");
+    Utility::info("libssh2_session_handshake");
   }
 
   std::string id_rsa_pub = homeDirectory + "/.ssh/id_rsa.pub";
@@ -69,22 +69,43 @@
 
 //std::cerr << sshExec("students.mimuw.edu.pl", "source $HOME/.bash_profile; player ant-waw-01.cdn.eurozet.pl / 8602 file.mp3 50000 no");
 
-PlayerExecution::PlayerExecution(std::string c, std::string p, unsigned m) :
+PlayerExecution::PlayerExecution(std::string c, std::string p, unsigned m, std::mutex &mut, SocketTcp &s, int i) :
+    valid(true),
     computer(c),
     parameters(p),
     mPort(m),
     udp(),
-    telnet(),
+    telnet(s),
+    id(i),
+    mutex(mut),
     thread(&PlayerExecution::run, this) {
 }
 
 void PlayerExecution::run() {
   udp.connectClient(computer, mPort);
+  valid &= udp.checkValid();
+  std::string msg;
+  if (valid) {
+    msg = "OK " + std::to_string(id) + "\n";
+  } else {
+    msg = "ERROR " + std::to_string(id) + " player launch failed\n";
+  }
+  mutex.lock();
+  telnet.Send(msg);
+  mutex.unlock();
   /*if (system("player ant-waw-01.cdn.eurozet.pl / 8602 /tmp/file.mp3 50000 no") != 0) {
-    Utility::syserr("system");
+    Utility:info("system");
   }*/
 }
 
 void PlayerExecution::quit() {
   udp.Send(QUIT);
+}
+
+bool PlayerExecution::isValid() {
+  return valid;
+}
+
+void PlayerExecution::sendCommand(const std::string &s) {
+  udp.Send(s);
 }

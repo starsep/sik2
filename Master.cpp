@@ -59,6 +59,9 @@ bool Master::checkListeningSocket(epoll_event &event) {
 void Master::run() {
   unsigned lastPort = port;
   sock.connectServer(port);
+  if (!sock.checkValid()) {
+    Utility::_exit(ExitCode::SystemError);
+  }
   if (lastPort != port) {
     std::cout << port << std::endl;
   }

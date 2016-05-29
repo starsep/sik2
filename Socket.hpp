@@ -10,6 +10,8 @@ class Socket {
 protected:
   int sock;
 
+  bool valid;
+
   void Close();
 
   bool Bind(const sockaddr *addr, socklen_t addrlen);
@@ -24,7 +26,12 @@ protected:
 
   virtual void Write(const void *, size_t) = 0;
 
+  void makeInvalid(std::string s);
+
 public:
+  bool checkValid();
+
+  bool checkValid(std::string pref);
 
   Socket(int);
 

@@ -12,7 +12,8 @@
 #include <cstring>
 #include <ctime>
 
-void Utility::Utility::syserr(const char *fmt, ...) {
+
+void Utility::info(const char *fmt, ...) {
   va_list fmt_args;
 
   fprintf(stderr, "ERROR: ");
@@ -20,7 +21,6 @@ void Utility::Utility::syserr(const char *fmt, ...) {
   vfprintf(stderr, fmt, fmt_args);
   va_end(fmt_args);
   fprintf(stderr, " (%d; %s)\n", errno, strerror(errno));
-  Utility::_exit(ExitCode::SystemError);
 }
 
 unsigned Utility::getPort(const char *cPort) {
@@ -44,15 +44,15 @@ void Utility::setAddrinfo(addrinfo *addr, bool passive) {
   addr->ai_flags |= AI_PASSIVE & passive;
 }
 
-void Utility::_getaddrinfo(const char *node, const char *service, addrinfo *hints,
+bool Utility::_getaddrinfo(const char *node, const char *service, addrinfo *hints,
                            addrinfo **res, bool passive) {
   setAddrinfo(hints, passive);
   int err = getaddrinfo(node, service, hints, res);
-  if (err == EAI_SYSTEM) {
-    Utility::syserr("getaddrinfo: %s", gai_strerror(err));
-  } else if (err != 0) {
-    Utility::syserr("getaddrinfo: %s", gai_strerror(err));
+  if (err == EAI_SYSTEM || err != 0) {
+    Utility::info("getaddrinfo: %s", gai_strerror(err));
+    return false;
   }
+  return true;
 }
 
 bool Utility::equalExceptWhitespaceOnEnd(const std::string &msg, const std::string &pat) {

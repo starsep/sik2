@@ -18,7 +18,6 @@ void TelnetSession::run() {
     std::vector <epoll_event> events = efd.wait(MAX_EVENTS_TELNET, INF);
     for (epoll_event &event : events) {
       if (!checkTelnetEvent(event)) {
-        //TODO:
       }
     }
   }
@@ -138,6 +137,9 @@ bool TelnetSession::checkPlay(const std::string &command) {
         sendClient(INVALID_PLAY_ID);
         return true;
       }
+      sendCommand(id, PLAY);
+      const std::string OK_PLAY = "OK " + std::to_string(id) + "\n";
+      sendClient(OK_PLAY);
       return true;
     }
   }
@@ -165,6 +167,9 @@ bool TelnetSession::checkPause(const std::string &command) {
         sendClient(INVALID_PAUSE_ID);
         return true;
       }
+      sendCommand(id, PAUSE);
+      const std::string OK_PAUSE = "OK " + std::to_string(id) + "\n";
+      sendClient(OK_PAUSE);
       return true;
     }
   }
@@ -222,6 +227,7 @@ bool TelnetSession::checkTitle(const std::string &command) {
         sendClient(INVALID_TITLE_ID);
         return true;
       }
+      sendCommand(id, TITLE);
       return true;
     }
   }
@@ -285,11 +291,9 @@ void TelnetSession::waitForEnd(int end, unsigned id) {
 
 unsigned TelnetSession::launchPlayer(const std::string &computer, const std::string &parameters, unsigned mPort) {
   mutex.lock();
-  playerExecutions.push_back(new PlayerExecution(computer, parameters, mPort));
-  unsigned id = playerExecutions.size() - 1;
+  unsigned id = playerExecutions.size();
+  playerExecutions.push_back(new PlayerExecution(computer, parameters, mPort, mutex, client, id));
   mutex.unlock();
-  std::string msg = "OK " + std::to_string(id) + "\n";
-  sendClient(msg);
   return id;
 }
 
@@ -313,6 +317,16 @@ void TelnetSession::quitPlayerExecution(unsigned id) {
     playerExecutions[id] = nullptr;
     mutex.unlock();
     toRemove->quit();
+    toRemove->thread.join();
     delete toRemove;
+  }
+}
+
+void TelnetSession::sendCommand(unsigned id, const std::string &s) {
+  if (checkId(id)) {
+    mutex.lock();
+    PlayerExecution *receiver = playerExecutions[id];
+    receiver->sendCommand(s);
+    mutex.unlock();
   }
 }

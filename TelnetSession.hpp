@@ -48,6 +48,8 @@ private:
 
   void quitPlayerExecution(unsigned id);
 
+  void sendCommand(unsigned id, const std::string &s);
+
 public:
   TelnetSession(SocketTcp &c);
 

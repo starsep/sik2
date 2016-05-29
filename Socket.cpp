@@ -13,29 +13,57 @@
 #include <cstring>
 
 Socket::Socket() :
-    sock(0) {
+    sock(0),
+    valid(true) {
 
 }
 
 Socket::Socket(int _sock) :
-    sock(_sock) {
+    sock(_sock),
+    valid(true) {
+}
+
+void Socket::makeInvalid(std::string s) {
+  valid = false;
+  std::cerr << "Socket::makeInvalid: " << s << '\n';
+  Utility::info(s.c_str());
+}
+
+bool Socket::checkValid() {
+  return checkValid("");
+}
+
+bool Socket::checkValid(std::string pref) {
+  if (!valid) {
+    Utility::info((pref + " Socket is invalid").c_str());
+    return false;
+  }
+  return true;
 }
 
 void Socket::Socket_(int domain, int type, int protocol) {
+  if (!checkValid("Socket::Socket_")) {
+    return;
+  }
   sock = socket(domain, type, protocol);
   if (sock < 0) {
-    Utility::syserr("socket");
+    Utility::info("socket");
+    makeInvalid("Socket_");
   }
 }
 
 Socket::Socket(const Socket &c) :
-    sock(c.sock) {
+    sock(c.sock),
+    valid(c.valid) {
 }
 
 void Socket::Connect(const sockaddr *addr, socklen_t addrlen) {
+  if (!checkValid("Socket::Connect")) {
+    return;
+  }
   int err = connect(sock, addr, addrlen);
   if (err < 0) {
-    Utility::syserr("connect");
+    makeInvalid("connect");
   }
 }
 
@@ -44,38 +72,57 @@ int Socket::get() const {
 }
 
 void Socket::makeNonBlocking() {
+  if (!checkValid("Socket::makeNonBlocking")) {
+    return;
+  }
   int flags, s;
 
   flags = fcntl(sock, F_GETFL, 0);
   if (flags == -1) {
-    Utility::syserr("fcntl");
+    return makeInvalid("fcntl");
   }
 
   flags |= O_NONBLOCK;
   s = fcntl(sock, F_SETFL, flags);
   if (s == -1) {
-    Utility::syserr("fcntl");
+    return makeInvalid("fcntl");
   }
 }
 
 void Socket::Close() {
+  if (!checkValid("Close")) {
+    return;
+  }
   int err = close(sock);
   if (err < 0) {
-    Utility::syserr("close");
+    makeInvalid("close");
   }
 }
 
 void Socket::Listen() {
+  if (!checkValid("Socket::Listen")) {
+    return;
+  }
   if (listen(sock, SOMAXCONN)) {
-    Utility::syserr("listen");
+    makeInvalid("listen");
   }
 }
 
 bool Socket::Bind(const sockaddr *addr, socklen_t addrlen) {
-  return bind(sock, addr, addrlen) == 0;
+  if (!checkValid("Socket::Bind")) {
+    return false;
+  }
+  int res = bind(sock, addr, addrlen);
+  if (res != 0) {
+    makeInvalid("bind");
+  }
+  return res == 0;
 }
 
 std::string Socket::receive(int max_len) {
+  if (!checkValid("Socket::receive")) {
+    return "";
+  }
   static char buffer[BUFFER_LEN];
   std::string result = INVALID_DATA;
   while (true) {
@@ -95,6 +142,9 @@ std::string Socket::receive(int max_len) {
 }
 
 void Socket::Send(const std::string &s) {
+  if (!checkValid("Socket::Send")) {
+    return;
+  }
   Write(s.c_str(), s.size());
 }
 

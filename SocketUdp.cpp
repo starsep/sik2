@@ -1,6 +1,9 @@
 #include "SocketUdp.hpp"
 
 void SocketUdp::connectServer(unsigned &port) {
+  if (!checkValid()) {
+    return;
+  }
   Socket_(AF_INET, SOCK_DGRAM, 0);
 
   memset(&my_address, 0, sizeof(my_address));
@@ -15,6 +18,9 @@ void SocketUdp::connectServer(unsigned &port) {
 }
 
 void SocketUdp::connectClient(const std::string &host, const unsigned port) {
+  if (!checkValid()) {
+    return;
+  }
   addrinfo hints;
   addrinfo *addr_result;
 
@@ -24,7 +30,10 @@ void SocketUdp::connectClient(const std::string &host, const unsigned port) {
   hints.ai_socktype = SOCK_DGRAM;
   hints.ai_protocol = IPPROTO_UDP;
 
-  Utility::_getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &addr_result);
+  if (!Utility::_getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &addr_result)) {
+    makeInvalid("_getaddrinfo");
+    return;
+  }
 
   my_address.sin_family = AF_INET; // IPv4
   my_address.sin_addr.s_addr =
@@ -47,20 +56,26 @@ SocketUdp::SocketUdp(int d) :
 }
 
 void SocketUdp::Write(const void *data, size_t size) {
+  if (!checkValid()) {
+    return;
+  }
   size_t len = sendto(sock, data, size, 0,
                       reinterpret_cast<sockaddr *>(&other_address),
                       static_cast<socklen_t>(sizeof(other_address)));
   if (len != size) {
-    Utility::syserr("sendto");
+    makeInvalid("sendto");
   }
 }
 
 ssize_t SocketUdp::Read(void *buffer, size_t maxCount) {
+  if (!checkValid()) {
+    return 0;
+  }
   static socklen_t rcva_len = sizeof(other_address);
   ssize_t count = recvfrom(sock, buffer, maxCount, 0,
                            reinterpret_cast<sockaddr *>(&other_address), &rcva_len);
   if (count == -1 && errno != EAGAIN) {
-    Utility::syserr("recvfrom");
+    makeInvalid("recvfrom");
   }
   return count;
 }

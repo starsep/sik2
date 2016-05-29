@@ -80,9 +80,9 @@ private:
 public:
   static void _exit(ExitCode);
 
-  static void syserr(const char *fmt, ...);
+  static void info(const char *fmt, ...);
 
-  static void _getaddrinfo(const char *, const char *, addrinfo *, addrinfo **,
+  static bool _getaddrinfo(const char *, const char *, addrinfo *, addrinfo **,
                            bool = false);
 
   static unsigned getPort(const char *);
