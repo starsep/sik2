@@ -20,7 +20,7 @@ private:
 
   void run();
 
-  void checkTelnetEvent(epoll_event &event);
+  bool checkTelnetEvent(epoll_event &event);
 
   bool checkCommand(const std::string &);
 

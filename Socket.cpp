@@ -99,5 +99,7 @@ void Socket::Send(const std::string &s) {
 }
 
 Socket::~Socket() {
-  Close();
+  if (get() != -1) {
+    Close();
+  }
 }

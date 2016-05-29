@@ -14,12 +14,20 @@ void TelnetSession::run() {
   client.makeNonBlocking();
   Epoll efd{};
   efd.addEvent(client);
+  //std::cerr << "XD1\n";
+  std::cerr.flush();
   while (running) {
+    //std::cerr << "XD42\n";
     std::vector <epoll_event> events = efd.wait(MAX_EVENTS_TELNET, INF);
+    //std::cerr << "XD53\n";
     for (epoll_event &event : events) {
-      checkTelnetEvent(event);
+      if (!checkTelnetEvent(event)) {
+        return;
+      }
+      //std::cerr << "XD2\n";
     }
   }
+  std::cerr << "XD3\n";
   for (std::thread *t: waitingThreads) {
     t->join();
   }
@@ -235,21 +243,23 @@ bool TelnetSession::checkCommand(const std::string &c) {
   return checkAt(c) || checkPause(c) || checkPlay(c) || checkQuit(c) || checkStart(c) || checkTitle(c);
 }
 
-void TelnetSession::checkTelnetEvent(epoll_event &event) {
+bool TelnetSession::checkTelnetEvent(epoll_event &event) {
   if (event.data.fd == client.get()) {
-    //std::cerr << "TELNET EVENT FROM " << event.data.fd << " " << client.get() << " :D\n";
+    std::cerr << "TELNET EVENT FROM " << event.data.fd << " " << client.get() << " :D\n";
     std::string msg;
     try {
       msg = client.receive();
     } catch (ClosedConnectionException) {
       running = false;
-      return;
+      return true;
     }
     if (!checkCommand(msg)) {
       static const std::string INVALID_COMMAND = "ERROR Invalid command. Available: AT START PLAY PAUSE QUIT TITLE\n";
       sendClient(INVALID_COMMAND);
     }
+    return true;
   }
+  return false;
 }
 
 TelnetSession::~TelnetSession() {
