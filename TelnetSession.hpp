@@ -7,32 +7,16 @@
 #include "PlayerExecution.hpp"
 
 #include <thread>
+#include <mutex>
 
 class TelnetSession {
 private:
-  struct TimedEvent {
-  private:
-    int minutes() const {
-      return 60 * hh + mm;
-    }
-  public:
-    int hh;
-    int mm;
-    int m;
-    std::string computer;
-    std::string parameters;
-    int mPort;
-
-    bool operator<(const TimedEvent &b) const {
-      return minutes() < b.minutes();
-    }
-  };
-
   Socket client;
   bool running;
-  std::thread *thread;
+  std::mutex mutex;
+  std::thread *telnetThread;
+  std::vector<std::thread *> waitingThreads;
   std::vector<PlayerExecution *> playerExecutions;
-  std::vector <TimedEvent> timedEvents;
 
   void run();
 
@@ -52,10 +36,20 @@ private:
 
   bool checkTitle(const std::string &);
 
+  void waitForStart(int begin, int m, std::string c, std::string p, int mPort);
+
+  void waitForEnd(int end, int id);
+
+  int launchPlayer(const std::string &computer, const std::string &parameters, int mPort);
+
+  void sendClient(const std::string &msg);
+
+  bool checkId(int id);
+
 public:
   TelnetSession(Socket c);
 
-  TelnetSession(const TelnetSession &);
+  TelnetSession(const TelnetSession &) = delete;
 
   ~TelnetSession();
 };

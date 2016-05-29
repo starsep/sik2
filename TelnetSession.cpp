@@ -1,17 +1,13 @@
 #include "TelnetSession.hpp"
+#include <chrono>
 
 TelnetSession::TelnetSession(Socket c) :
     client(c.get()),
     running(true),
-    thread(new std::thread(&TelnetSession::run, this)),
-    playerExecutions(),
-    timedEvents() {
-}
-
-TelnetSession::TelnetSession(const TelnetSession &t) {
-  client = Socket(t.client.get());
-  thread = t.thread;
-  playerExecutions = t.playerExecutions;
+    mutex(),
+    telnetThread(new std::thread(&TelnetSession::run, this)),
+    waitingThreads(),
+    playerExecutions() {
 }
 
 void TelnetSession::run() {
@@ -23,6 +19,9 @@ void TelnetSession::run() {
     for (epoll_event &event : events) {
       checkTelnetEvent(event);
     }
+  }
+  for (std::thread *t: waitingThreads) {
+    t->join();
   }
 }
 
@@ -43,12 +42,17 @@ bool TelnetSession::checkStart(const std::string &command) {
       std::string metadata = result[7];
       if (metadata != NO && metadata != YES) {
         static const std::string INVALID_START_METADATA = "ERROR metadata option must be " + YES + " or " + NO + "\n";
-        client.Write(INVALID_START_METADATA);
+        sendClient(INVALID_START_METADATA);
         return true;
+      }
+      std::string parameters;
+      for (int i = 2; i <= 7; i++) {
+        parameters += result[i] + " ";
       }
       std::cerr << START << "ing player @ " << computer <<
       " with parameters: " << host << " " << path << " " << rPort << " " << file << " " << mPort << " " << metadata <<
       "\n";
+      launchPlayer(computer, parameters, mPort);
       return true;
     }
   }
@@ -56,7 +60,7 @@ bool TelnetSession::checkStart(const std::string &command) {
   }
   static const std::string INVALID_START =
       "ERROR in " + START + " command. Usage: " + START + " computer host path r-port file m-port metadata\n";
-  client.Write(INVALID_START);
+  sendClient(INVALID_START);
   return true;
 }
 
@@ -74,13 +78,13 @@ bool TelnetSession::checkAt(const std::string &command) {
       if (hh > 23) {
         static const std::string INVALID_AT_HH =
             "ERROR in " + AT + " command. HH is too large\n";
-        client.Write(INVALID_AT_HH);
+        sendClient(INVALID_AT_HH);
         return true;
       }
       if (mm > 59) {
         static const std::string INVALID_AT_MM =
             "ERROR in " + AT + " command. MM is too large\n";
-        client.Write(INVALID_AT_MM);
+        sendClient(INVALID_AT_MM);
         return true;
       }
       int m = std::stoi(result[3]);
@@ -93,7 +97,7 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::string metadata = result[10];
       if (metadata != NO && metadata != YES) {
         static const std::string INVALID_AT_METADATA = "ERROR metadata option must be " + YES + " or " + NO + "\n";
-        client.Write(INVALID_AT_METADATA);
+        sendClient(INVALID_AT_METADATA);
         return true;
       }
       std::string parameters;
@@ -103,8 +107,8 @@ bool TelnetSession::checkAt(const std::string &command) {
       std::cerr << AT << "ing player @ " << computer <<
       " AT " << hh << ":" << mm << " for " << m << " minutes with parameters: " << parameters <<
       "\n";
-      timedEvents.push_back({hh, mm, m, computer, parameters, mPort});
-      std::sort(timedEvents.begin(), timedEvents.end());
+      waitingThreads.push_back(
+          new std::thread(&TelnetSession::waitForStart, this, hh * 60 + mm, m, computer, parameters, mPort));
       return true;
     }
   }
@@ -112,7 +116,7 @@ bool TelnetSession::checkAt(const std::string &command) {
   }
   static const std::string INVALID_AT =
       "ERROR in " + AT + " command. Usage: " + AT + " HH.MM M computer host path r-port file m-port metadata\n";
-  client.Write(INVALID_AT);
+  sendClient(INVALID_AT);
   return true;
 }
 
@@ -125,6 +129,13 @@ bool TelnetSession::checkPlay(const std::string &command) {
   try {
     if (boost::regex_match(command, result, playPattern)) {
       std::cerr << PLAY << " " << result[1] << "\n";
+      int id = std::stoi(result[1]);
+      if (!checkId(id)) {
+        static const std::string INVALID_PLAY_ID =
+            "ERROR in " + PLAY + " command. Invalid id.\n";
+        sendClient(INVALID_PLAY_ID);
+        return true;
+      }
       return true;
     }
   }
@@ -132,7 +143,7 @@ bool TelnetSession::checkPlay(const std::string &command) {
   }
   static const std::string INVALID_PLAY =
       "ERROR in " + PLAY + " command. Usage: " + PLAY + " id\n";
-  client.Write(INVALID_PLAY);
+  sendClient(INVALID_PLAY);
   return true;
 }
 
@@ -145,6 +156,13 @@ bool TelnetSession::checkPause(const std::string &command) {
   try {
     if (boost::regex_match(command, result, pausePattern)) {
       std::cerr << PAUSE << " " << result[1] << "\n";
+      int id = std::stoi(result[1]);
+      if (!checkId(id)) {
+        static const std::string INVALID_PAUSE_ID =
+            "ERROR in " + PAUSE + " command. Invalid id.\n";
+        sendClient(INVALID_PAUSE_ID);
+        return true;
+      }
       return true;
     }
   }
@@ -152,7 +170,7 @@ bool TelnetSession::checkPause(const std::string &command) {
   }
   static const std::string INVALID_PAUSE =
       "ERROR in " + PAUSE + " command. Usage: " + PAUSE + " id\n";
-  client.Write(INVALID_PAUSE);
+  sendClient(INVALID_PAUSE);
   return true;
 }
 
@@ -165,6 +183,13 @@ bool TelnetSession::checkQuit(const std::string &command) {
   try {
     if (boost::regex_match(command, result, quitPattern)) {
       std::cerr << QUIT << " " << result[1] << "\n";
+      int id = std::stoi(result[1]);
+      if (!checkId(id)) {
+        static const std::string INVALID_QUIT_ID =
+            "ERROR in " + QUIT + " command. Invalid id.\n";
+        sendClient(INVALID_QUIT_ID);
+        return true;
+      }
       return true;
     }
   }
@@ -172,7 +197,7 @@ bool TelnetSession::checkQuit(const std::string &command) {
   }
   static const std::string INVALID_QUIT =
       "ERROR in " + QUIT + " command. Usage: " + QUIT + " id\n";
-  client.Write(INVALID_QUIT);
+  sendClient(INVALID_QUIT);
   return true;
 }
 
@@ -185,6 +210,13 @@ bool TelnetSession::checkTitle(const std::string &command) {
   try {
     if (boost::regex_match(command, result, titlePattern)) {
       std::cerr << TITLE << " " << result[1] << "\n";
+      int id = std::stoi(result[1]);
+      if (!checkId(id)) {
+        static const std::string INVALID_TITLE_ID =
+            "ERROR in " + TITLE + " command. Invalid id.\n";
+        sendClient(INVALID_TITLE_ID);
+        return true;
+      }
       return true;
     }
   }
@@ -192,7 +224,7 @@ bool TelnetSession::checkTitle(const std::string &command) {
   }
   static const std::string INVALID_TITLE =
       "ERROR in " + TITLE + " command. Usage: " + TITLE + " id\n";
-  client.Write(INVALID_TITLE);
+  sendClient(INVALID_TITLE);
   return true;
 }
 
@@ -212,11 +244,53 @@ void TelnetSession::checkTelnetEvent(epoll_event &event) {
     }
     if (!checkCommand(msg)) {
       static const std::string INVALID_COMMAND = "ERROR Invalid command. Available: AT START PLAY PAUSE QUIT TITLE\n";
-      client.Write(INVALID_COMMAND);
+      sendClient(INVALID_COMMAND);
     }
   }
 }
 
 TelnetSession::~TelnetSession() {
-  delete thread;
+  for (std::thread *t: waitingThreads) {
+    delete t;
+  }
+  delete telnetThread;
+}
+
+void TelnetSession::waitForStart(int begin, int m, std::string c, std::string p, int mPort) {
+  const std::chrono::milliseconds timeToWait(MAX_TIME);
+  while (running && Utility::currentMinutes() != begin) {
+    std::this_thread::sleep_for(timeToWait);
+  }
+  if (!running) {
+    return;
+  }
+  int id = launchPlayer(c, p, mPort);
+  waitForEnd((begin + m) % (24 * 60), id);
+}
+
+void TelnetSession::waitForEnd(int end, int id) {
+
+}
+
+int TelnetSession::launchPlayer(const std::string &computer, const std::string &parameters, int mPort) {
+  mutex.lock();
+  playerExecutions.push_back(new PlayerExecution(computer, parameters, mPort));
+  int id = playerExecutions.size() - 1;
+  mutex.unlock();
+  std::string msg = "OK " + std::to_string(id) + "\n";
+  sendClient(msg);
+  return id;
+}
+
+void TelnetSession::sendClient(const std::string &msg) {
+  mutex.lock();
+  client.Write(msg);
+  mutex.unlock();
+}
+
+bool TelnetSession::checkId(int id) {
+  mutex.lock();
+  bool result = id >= 0 && id < static_cast<int>(playerExecutions.size()) && playerExecutions[id] != nullptr;
+  mutex.unlock();
+  return result;
 }
