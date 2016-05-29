@@ -54,7 +54,7 @@ void PlayerExecution::sshExec(std::string hostname, const std::string command) {
     Utility::info("libssh2_channel_exec");
   }
 
-  const std::chrono::milliseconds timeToWait(200);
+  const std::chrono::milliseconds timeToWait(300);
   std::this_thread::sleep_for(timeToWait);
 
   libssh2_channel_close(channel);
@@ -93,7 +93,7 @@ void PlayerExecution::run() {
   valid &= udp.checkValid();
   std::string msg;
 
-  sshExec(computer, "nohup player " + parameters + " &");
+  sshExec(computer, "screen; player " + parameters);
 
   if (valid) {
     msg = "OK " + std::to_string(id) + "\n";
