@@ -13,7 +13,7 @@ void PlayerExecution::sshExec(std::string hostname, const std::string command) {
   std::string username = user->pw_name;
 
   boost::smatch result;
-  const static boost::regex usernameWithHostnamePattern(R"((\s+?)@(\s+))");
+  const static boost::regex usernameWithHostnamePattern(R"((.+?)@(.+))");
   try {
     if (boost::regex_match(hostname, result, usernameWithHostnamePattern)) {
       username = result[1];
