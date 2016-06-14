@@ -22,8 +22,6 @@ private:
 
   bool checkUdpEvent(epoll_event &e);
 
-  void sshExec(std::string hostname, const std::string command);
-
 public:
   std::thread thread;
 
